@@ -3,6 +3,7 @@
 import { MTMCourses } from './course.js';
 import { MTMFinish } from './finish.js';
 import { MTMKit } from './kit.js';
+import { MTMOffice } from './office.js';
 
 const MTMScenery = (() => {
   'use strict';
@@ -161,6 +162,7 @@ const MTMScenery = (() => {
     ]
   };
   const gradeNoticesByCourse={
+    office:[],
     arizona:[
       [.043,1,'ridgeline','peak','HILL RECEIPTS','KEEP FOR DESCENT'],
       [.082,-1,'survey','level',"IVAN'S LEVEL",'BUBBLE AT LARGE'],
@@ -2545,9 +2547,23 @@ const MTMScenery = (() => {
     const stage = createStage(world, terrain, course);
     stage.mesas = [];
     course.mesas = stage.mesas;
+    if (course.id === 'office') return officeFloor(stage);
     if (course.id === 'arizona') desert(stage);
     else if (course.id === 'eight') forest(stage);
     else speedway(stage);
+    return assembleScene(stage);
+  }
+
+  // The Fifth Floor: the office itself is the environment. The baked room
+  // provides every surface; scenery work is limited to collision registration
+  // and the assemble pass for the shared batching.
+  function officeFloor(stage) {
+    const {world, T, obstacles} = stage;
+    world.add(MTMOffice.build(T));
+    // The room's outer walls are the hard boundary; furniture stays drivable
+    // scenery the trucks can plow past at desk-building scale.
+    for(const slab of MTMOffice.solids())
+      obstacles.push({x:slab.x,z:slab.z,hx:slab.hx,hz:slab.hz,material:'stone'});
     return assembleScene(stage);
   }
 
