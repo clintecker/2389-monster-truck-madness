@@ -189,6 +189,15 @@ const MTMView = (() => {
   // A heat, replay, tour and Canvas mode share the same surveyed installations,
   // protected racing line and seating sections. Only their animation clocks differ.
   function fairPlan(course,data,props){
+    // The Fifth Floor races indoors; the midway, carnival and fan stands
+    // belong to the open-air venues and stay outside its walls.
+    if(course.id==='office'){
+      const fair={entries:[],carnival:{fixed:[]},crowd:{fixed:[],sections:[]},electric:{},lookouts:[],
+        obstacles:data.obstacles||[],jokes:[],survey:null,classic:null,attraction:null};
+      course.midway=fair.entries;course.carnival=fair.carnival;course.crowd=fair.crowd;
+      course.obstacles=fair.obstacles;course.jokeSigns=fair.jokes;course.lookouts=fair.lookouts;
+      return fair;
+    }
     const entries=MTMMidway.plan(course,data);
     const carnival=MTMCarnival.plan(course,data,entries,props),electric=MTMElectric.plan(course,data.jokeSigns||[],entries);
     const crowd=MTMCrowd.plan(course,data,entries,carnival),lookouts=MTMElectric.lookouts(course,data,entries,carnival);
