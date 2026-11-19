@@ -1,5 +1,8 @@
 /* Each attraction is scenery only. Its few moving rigid sections follow the
    supplied race clock, so replay, pause and reduced-motion poses are repeatable. */
+import { MTMCourses } from './course.js';
+import { MTMKit } from './kit.js';
+
 const MTMOddities = (() => {
   const T=THREE,tau=Math.PI*2,geometries=new Map(),colors=new Map();
   const matte=new T.MeshStandardMaterial({vertexColors:true,metalness:.08,roughness:.66,side:T.DoubleSide});
@@ -301,3 +304,5 @@ const MTMOddities = (() => {
   }
   return {attach,location,art:{builder,node,label}};
 })();
+
+export {MTMOddities};

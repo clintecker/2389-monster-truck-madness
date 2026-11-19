@@ -62,3 +62,5 @@ const MTMKit = (() => {
 
   return { TAU, clamp, mix, cycle, rng, canvas, map, paint: { poly, rect, oval, stroke } };
 })();
+
+export {MTMKit};

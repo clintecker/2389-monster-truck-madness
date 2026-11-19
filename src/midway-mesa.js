@@ -1,5 +1,7 @@
 /* Blackout Mesa's roadside midway. A clock value and a decaying horn pulse
    completely determine each pose, including the simplified projection artwork. */
+import { MTMKit } from './kit.js';
+
 const MTMMesaMidway=(()=>{
   const pi=Math.PI,tau=2*pi,sin=Math.sin,cos=Math.cos;
   const dark='#192038',steel='#53657d',alloy='#abb9c4',white='#f5f5df';
@@ -739,3 +741,5 @@ const MTMMesaMidway=(()=>{
     {id:'mesa-carrion-luggage',crew:'Ivan',name:'Carrion Luggage',route:'return',f:.960,off:-31,radius:14.45,footprintRadius:8.55,width:16.95,height:12.90,ink:pink,reply:'The bird has claimed your baggage claim.',sound:'bell',build:vulture,draw:drawVulture}
   ];
 })();
+
+export {MTMMesaMidway};

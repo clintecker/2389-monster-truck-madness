@@ -32,3 +32,5 @@ const MTMMotion=(()=>{
   }
   return {step,track,mix};
 })();
+
+export {MTMMotion};

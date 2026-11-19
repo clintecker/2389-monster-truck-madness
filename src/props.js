@@ -351,3 +351,5 @@ const MTMProps = (() => {
   }
   return {attach,drawLoose};
 })();
+
+export {MTMProps};

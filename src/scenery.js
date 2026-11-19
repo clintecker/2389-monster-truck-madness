@@ -1,6 +1,10 @@
 /* 2389 Research Night Shift. Static, locally generated environments for the
    desert telemetry range, forest substation and fairgrounds drag strip. */
-window.MTMScenery = (() => {
+import { MTMCourses } from './course.js';
+import { MTMFinish } from './finish.js';
+import { MTMKit } from './kit.js';
+
+const MTMScenery = (() => {
   'use strict';
 
   const {TAU, clamp, mix} = MTMKit;
@@ -2357,3 +2361,5 @@ window.MTMScenery = (() => {
 
   return {build};
 })();
+
+export {MTMScenery};

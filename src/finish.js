@@ -183,3 +183,5 @@ const MTMFinish=(()=>{
   }
   return {venue,attach,show,reserved,soundCues};
 })();
+
+export {MTMFinish};

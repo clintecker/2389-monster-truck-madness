@@ -1,5 +1,8 @@
 /* Kinetic roadside art for Feedback Loop. Each rigid section shares a mesh;
    every pose is a pure function of replay time and the local horn pulse. */
+import { MTMKit } from './kit.js';
+import { MTMOddities } from './oddities.js';
+
 const MTMLoopMidway = (() => {
   'use strict';
 
@@ -781,3 +784,5 @@ const MTMLoopMidway = (() => {
       reply:'Particle identified. It was a seed.',sound:'bell'},melonCollider)
   ];
 })();
+
+export {MTMLoopMidway};

@@ -1,6 +1,10 @@
 /* The terrain, road surface and physical takeoffs share the same height function.
    Most detail is painted into repeating gravel and track textures to keep the
    number of objects independent of the length of the race. */
+import { MTMCelestial } from './celestial.js';
+import { MTMFinish } from './finish.js';
+import { MTMKit } from './kit.js';
+
 const MTMTrack = (() => {
   const T=THREE,{clamp, rng, canvas, map} = MTMKit;
   const palettes={
@@ -271,8 +275,10 @@ const MTMTrack = (() => {
     const world=new T.Group(),fog=palettes[c.id].fog;
     world.add(terrainMesh(c),ribbon(c,c.loop?0:-24,c.loop?c.length:c.length+29,()=>0,c.width));
     if(c.id==='eight')world.add(ribbon(c,c.length*.688,c.length*.791,t=>-14*Math.sin(t*Math.PI)**1.4,10,true));
-    const setStartSignal=gatesAndSigns(world,c),cars=landmarks(world,c);if(window.MTMScenery)MTMScenery.build(world,c.ground,c);
+    const setStartSignal=gatesAndSigns(world,c),cars=landmarks(world,c);if(MTMScenery)MTMScenery.build(world,c.ground,c);
     const finishShow=MTMFinish.attach(world,c,board);return {world,finishShow,sky:MTMCelestial.build(c.id),cars,fog,setStartSignal};
   }
   return {build,canvas,map,rng};
 })();
+
+export {MTMTrack};

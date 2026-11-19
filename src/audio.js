@@ -1,6 +1,8 @@
 /* 2389 Research Night Shift. The engine, FM timing signals and track sounds are
    synthesized locally, and the first driver interaction opens the device. */
-(() => {
+import { MTMKit } from './kit.js';
+
+const MTMAudio = (() => {
   'use strict';
 
   const {clamp} = MTMKit;
@@ -975,5 +977,7 @@
   // An unfocused or backgrounded window should release the audio device.
   window.addEventListener('pagehide', stop);
   document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
-  window.MTMAudio = {unlock, setMuted, update, effect, call, crowd, stop};
+  return {unlock, setMuted, update, effect, call, crowd, stop};
 })();
+
+export {MTMAudio};

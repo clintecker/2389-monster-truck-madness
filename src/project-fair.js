@@ -1,5 +1,7 @@
 /* Six midway machines licensed from the 2389 project fair. Geometry, paint,
    and horn choreography share one set of forms across the three renderers. */
+import { MTMKit } from './kit.js';
+
 const MTMProjectFair=(()=>{
   'use strict';
   const T=THREE,TAU=Math.PI*2,ink='#152137',shadow='#273750',iron='#53667a',nickel='#a3b6bb',
@@ -287,3 +289,5 @@ const MTMProjectFair=(()=>{
       caption,reply,sound,build:m.build,draw:m.draw};
   });
 })();
+
+export {MTMProjectFair};

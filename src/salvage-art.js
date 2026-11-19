@@ -588,3 +588,5 @@ const MTMSalvageArt=(()=>{
   });
   return {kits};
 })();
+
+export {MTMSalvageArt};

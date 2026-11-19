@@ -1,5 +1,7 @@
 /* Kinetic airshow floats. Models are broadside to local +Z, origin beneath
    the float. Animation is a pure function of course time and horn response. */
+import { MTMKit } from './kit.js';
+
 const MTMParadeArt=(()=>{
   'use strict';
   const T=THREE,turn=Math.PI*2,pi=Math.PI,meshCache=new Map(),decalCache=new Map();
@@ -534,3 +536,5 @@ const MTMParadeArt=(()=>{
     draw(c,t,p){c.save();c.translate(x,y);draw(c,t,p);c.restore();}
   }));
 })();
+
+export {MTMParadeArt};

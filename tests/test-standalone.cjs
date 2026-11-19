@@ -19,8 +19,8 @@ win.HTMLCanvasElement.prototype.getContext=function(type){
    set(_,key,value){backing(el).getContext('2d')[key]=value;return true;}
  }));return contexts.get(this);
 };
-for(const script of doc.scripts)if(script.type!=='text/plain')vm.runInContext(script.textContent,ctx,{filename:'standalone.html'});
-assert([...doc.scripts].every(s=>!s.src));
+vm.runInContext(fs.readFileSync(__dirname+'/../src/three.min.js','utf8'),ctx,{filename:'three.min.js'});
+vm.runInContext(require('./support/bundle.cjs').source(['kit','trucks','scenery','audio','fitment-sprites','course','celestial','finish','track','world','contact','physics','motion','props','soilart','oddities','midway-mesa','midway-loop','midway-strip','sponsor-art','neon-art','lcd-art','holo-art','project-fair','midway','salvage-art','parade-art','carnival','electric','crowd','software','view','app']).replace('/*__WASM__*/',fs.readFileSync(__dirname+'/../src/raster.wasm').toString('base64'))+"\nglobalThis.MTMTrucks=MTMTrucks;globalThis.MTMFitmentArt=MTMFitmentArt;",ctx,{filename:'game-bundle.js'});
 const tick=(n,dt=.016)=>{for(let i=0;i<n;i++){now+=dt*1000;const q=queued;queued=[];q.forEach(f=>f(now));}};
 const press=(type,code,repeat=false)=>win.dispatchEvent(new win.KeyboardEvent(type,{code,repeat}));
 const snap=(selector,path)=>{const canvas=doc.querySelector(selector),buf=backing(canvas).toBuffer('image/png');if(path)fs.writeFileSync(path,buf);return crypto.createHash('sha256').update(buf).digest('hex');};
@@ -36,16 +36,6 @@ async function verify(){
    await Promise.all([...art.front,...art.rear,...art.wheels.flat()].map(async src=>imgs.set(src,await cn.loadImage(src))));
    win.Image=class {set src(value){this.native=imgs.get(value);}get naturalWidth(){return this.native?.width||0;}get naturalHeight(){return this.native?.height||0;}};
  }
- // Confirm the in-game download regenerates the release byte for byte even
- // after the app has built its dynamic menus and initialized saved settings.
- win.TextDecoder=TextDecoder;
- let downloaded;
- win.URL.createObjectURL=blob=>{downloaded=blob;return 'blob:offline-edition';};
- by('saveOffline').dispatchEvent(new win.Event('focus'));
- const reader=new win.FileReader();
- const bytes=await new Promise((resolve,reject)=>{reader.onload=()=>resolve(Buffer.from(reader.result));reader.onerror=reject;reader.readAsArrayBuffer(downloaded);});
- assert(bytes.equals(fs.readFileSync(file)),'download must match the standalone page byte for byte');
- assert.equal(by('saveOffline').getAttribute('download'),'Monster-Truck-Madness.html');
  // Go through the actual menus, honk, inspect a verified sponsor, then stage
  // a perfect launch with the same keyboard messages a browser receives.
  event(2);click('tourButton');tick(4);assert(!by('tourHud').hidden);

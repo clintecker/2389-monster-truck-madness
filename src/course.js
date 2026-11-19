@@ -1,5 +1,7 @@
 /* Distances in metres. Each event uses an arc-length path for signage, timing,
    AI and the printed route map. The player drives freely in world space. */
+import { MTMKit } from './kit.js';
+
 const MTMCourses = (() => {
   const specs = [
     {id:'arizona', name:'Blackout Mesa', classic:'Arizona Rally', type:'Rally', place:'Arizona desert', surface:'Sand & hardpack', width:21, laps:1, entrants:4, checkpoints:[.11,.24,.37,.49,.62,.75,.88,1],
@@ -217,3 +219,5 @@ const MTMCourses = (() => {
   }
   return Object.assign(events,{forDistance,recordKey,maxLaps});
 })();
+
+export {MTMCourses};

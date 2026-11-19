@@ -1,5 +1,18 @@
 /* Screen state, input and fixed-step clock. All persistent data is optional so
-   opening the single file in a private window or sandbox still works. */
+   opening the game in a private window or sandbox still works. */
+import { MTMAudio } from './audio.js';
+import { MTMCarnival } from './carnival.js';
+import { MTMCourses } from './course.js';
+import { MTMCrowd } from './crowd.js';
+import { MTMFinish } from './finish.js';
+import { MTMMidway } from './midway.js';
+import { MTMMotion } from './motion.js';
+import { MTMPhysics } from './physics.js';
+import { MTMTrucks } from './trucks.js';
+import { MTMView } from './view.js';
+import { MTMWorld } from './world.js';
+import { MTMFitmentArt } from './fitment-sprites.js';
+
 (() => {
   'use strict';
   const $=id=>document.getElementById(id),P=MTMPhysics,V=MTMView,A=MTMAudio,roster=MTMTrucks.roster,cs=MTMCourses;
@@ -85,23 +98,11 @@
     home.dataset.truck=String(cfg.truck);$('driveStatus').textContent=name;$('featuredName').textContent=name;
     $('transmissionStatus').textContent=(cfg.transmission?'Manual':'Automatic')+' transmission';
     $('garageButton').title='Open garage. Current truck: '+rig.name;
-    const source=window.MTMFitmentArt?.wheels[cfg.truck][cfg.tires];
+    const source=MTMFitmentArt?.wheels[cfg.truck][cfg.tires];
     if(source&&$('homeWheel').getAttribute('src')!==source)$('homeWheel').src=source;
     $('homeFitLabel').textContent=tire+' · '+MTMTrucks.suspensionSets[cfg.suspension].name;
     $('homeFit').setAttribute('aria-label','Inspect '+rig.name+' with '+tire+' tires');
   }
-  // Create the download on demand. Read only the four original embedded payloads.
-  // Current menus, save data and canvases never enter a portable copy.
-  const download=$('saveOffline');
-  function prepareDownload(){
-    if(download.dataset.ready||typeof URL.createObjectURL!=='function')return;
-    const source=Uint8Array.from(atob('/*__PAGE_TEMPLATE__*/'),ch=>ch.charCodeAt(0));
-    const ids={STYLES:'game-style',ENGINE:'three-engine',GAME:'night-game',NOTICES:'third-party-notices'};
-    const html=new TextDecoder().decode(source).replace(/\/\*__(STYLES|ENGINE|GAME|NOTICES)__\*\//g,(_,part)=>$(ids[part]).textContent);
-    download.href=URL.createObjectURL(new Blob([html],{type:'text/html;charset=utf-8'}));
-    download.dataset.ready='1';
-  }
-  for(const ev of ['pointerenter','focus','click'])download.addEventListener(ev,prepareDownload);
   select(cfg.event);garageLabel();
   function openDialog(type,kicker,html,wide=false){if(modal.hidden)returnFocus=document.activeElement;dialog=type;modal.hidden=false;panel.classList.toggle('wide',wide);$('dialogEyebrow').textContent=kicker;$('dialogBody').innerHTML=html;home.inert=true;hud.inert=true;$('closeModal').hidden=type==='result'&&!!series;panel.scrollTop=0;const focus=$('dialogBody').querySelector('[autofocus]')||$('closeModal');if(!focus.hidden)focus.focus({preventScroll:true});}
   function hideDialog(restore=true){if(dialog==='garage')V.exitGarage();dialog='';modal.hidden=true;home.inert=false;hud.inert=false;if(restore&&returnFocus?.isConnected&&!returnFocus.closest('[hidden]'))returnFocus.focus({preventScroll:true});returnFocus=null;}
@@ -138,7 +139,7 @@
       garageLabel();A.effect('select');save();
     };
     panel.querySelectorAll('[data-rig]').forEach(b=>{
-      const i=+b.dataset.rig,tile=b.querySelector('.fleet-tile'),src=window.MTMFitmentArt?.front[i];
+      const i=+b.dataset.rig,tile=b.querySelector('.fleet-tile'),src=MTMFitmentArt?.front[i];
       if(src)tile.style.backgroundImage='url("'+src+'")';
       b.onclick=()=>chooseTruck(i);
     });
@@ -163,7 +164,7 @@
     });
     for(const k of Object.keys(options))$('set-'+k).value=String(cfg[k]);
     $('rigName').textContent=r.name;$('swatch').style.background=r.color;$('rigIndex').textContent=String(cfg.truck+1).padStart(2,'0')+' / '+String(roster.length).padStart(2,'0');
-    const source=window.MTMFitmentArt?.wheels[cfg.truck][cfg.tires];if(source)$('wheelPortrait').src=source;
+    const source=MTMFitmentArt?.wheels[cfg.truck][cfg.tires];if(source)$('wheelPortrait').src=source;
     $('wheelPortrait').alt=r.name+' '+options.tires[cfg.tires]+' wheel';$('treadSpec').textContent=treads[cfg.tires];
     const cm=Math.round(MTMTrucks.suspensionSets[cfg.suspension].lift*100);$('rideSpec').textContent=cm===0?'Stock ride height':(cm>0?'+':'−')+Math.abs(cm)+' cm ride height';
     V.showroom($('garageView'),cfg.truck,cfg);garageLabel();

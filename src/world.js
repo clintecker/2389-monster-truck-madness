@@ -1,5 +1,8 @@
 /* Every heat owns its loose objects and its dirt heightfields. The course layout
    stays immutable, so restarting or watching a replay cannot dirty the next heat. */
+import { MTMContact } from './contact.js';
+import { MTMKit } from './kit.js';
+
 const MTMWorld = (() => {
   const {clamp} = MTMKit;
   const cols=21,rows=31;
@@ -162,3 +165,5 @@ const MTMWorld = (() => {
   }
   return {terrain,props,stepProps,deform,snapshot,replay,cols,rows,uplift};
 })();
+
+export {MTMWorld};

@@ -1,5 +1,7 @@
 /* Horizontal contact uses the wheel-to-wheel envelope. A small contact skin
    keeps a grazing pair in contact without making a side swipe bounce away. */
+import { MTMKit } from './kit.js';
+
 const MTMContact = (() => {
   const {clamp} = MTMKit;
   const skin=.035;
@@ -96,3 +98,5 @@ const MTMContact = (() => {
   }
   return {manifold,vehicles};
 })();
+
+export {MTMContact};

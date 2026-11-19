@@ -1,5 +1,9 @@
 /* The night-shift supporters' clubs. Every throw and every pose is a function of
    the race clock, seat number and recorded events; the tour can rewind a chant. */
+import { MTMCourses } from './course.js';
+import { MTMKit } from './kit.js';
+import { MTMOddities } from './oddities.js';
+
 const MTMCrowd=(()=>{
   'use strict';
   const T=THREE,tau=Math.PI*2,frames=12,beat=7.8,release=7;
@@ -591,3 +595,5 @@ const MTMCrowd=(()=>{
   }
   return {plan,attach,draw,react,energy,projectiles};
 })();
+
+export {MTMCrowd};

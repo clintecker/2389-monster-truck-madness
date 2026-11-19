@@ -1,5 +1,7 @@
 /* The Chicago midway at Overclock Strip. Its rides run on the race clock;
    each horn response is a pure pose that replays identically at the same time. */
+import { MTMKit } from './kit.js';
+
 const MTMStripMidway=(()=>{
   'use strict';
   const T=THREE,TAU=2*Math.PI,dark='#172237',frame='#465575',steel='#879cb3',ivory='#fff0cd';
@@ -857,3 +859,5 @@ const MTMStripMidway=(()=>{
     {id:'strip-municipal-tuba',crew:'Eden',name:'Municipal Tuba',f:.93,off:-27,radius:14.55,footprintRadius:5.06,width:8.78,height:14.47,ink:gold,reply:'The tuba has filed a noise complaint.',sound:'brass',build:tuba,draw:drawTuba}
   ];
 })();
+
+export {MTMStripMidway};

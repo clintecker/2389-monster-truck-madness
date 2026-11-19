@@ -1,8 +1,10 @@
 /* 2389 Research Night Shift fleet: original monster-truck meshes, mechanical detail, and painted race graphics.
    Coordinates are in metres. +Z is forward and +Y is up. */
-(() => {
+import { MTMKit } from './kit.js';
+
+const MTMTrucks = (() => {
   'use strict';
-  const T = window.THREE;
+  const T = THREE;
   const roster = [
     {name:'BIGFOOT',color:'#68f7dd',number:'01',ink:'#132646',paint:'#29497e',highlight:'#3c649d',accent:'#89ffe0',trim:'#f858a6',lamp:'#cafff0'},
     {name:'Grave Digger',color:'#ca8dff',number:'07',ink:'#281831',paint:'#51325e',highlight:'#82538b',accent:'#efddc4',trim:'#ff53aa',lamp:'#f8a9ff'},
@@ -1157,5 +1159,7 @@
       }
     }
   }
-  window.MTMTrucks={roster,tireSets,suspensionSets,make,pose};
+  return {roster,tireSets,suspensionSets,make,pose};
 })();
+
+export {MTMTrucks};

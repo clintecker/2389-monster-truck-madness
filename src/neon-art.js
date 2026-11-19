@@ -2,6 +2,8 @@
    and each bank of chasing lamps share a drawing measured in sign-shop units.
    The bezels and enamel are painted once. Bright glass and moving bulbs are
    separate raised meshes with graduated halos, including in the CPU renderer. */
+import { MTMKit } from './kit.js';
+
 const MTMNeonArt=(()=>{
   'use strict';
   const T=THREE,W=120,H=100,tau=Math.PI*2;
@@ -436,3 +438,5 @@ const MTMNeonArt=(()=>{
       build:(root,art)=>build(d,root,art),draw:(ctx,t,p)=>flat(d,ctx,t,p)};
   });
 })();
+
+export {MTMNeonArt};
