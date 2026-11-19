@@ -1,0 +1,17 @@
+{
+  "name": "2389-monster-truck-madness",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Seven monster trucks, six events, one questionable research budget.",
+  "engines": {"node": ">=22"},
+  "scripts": {
+    "build": "python3 tools/build.py",
+    "test": "node tests/test-grid.cjs && node tests/test-handling.cjs && node tests/test-physics.cjs && node tests/test-physics.cjs --manual && node tests/test-flow.cjs && node tests/test-flow.cjs --after-hours",
+    "test:render": "node tests/test-standalone.cjs",
+    "test:canvas": "node tests/test-standalone.cjs --canvas",
+    "test:scenery": "node tests/test-midway.cjs",
+    "test:endurance": "node tests/test-physics.cjs --endurance",
+    "build:raster": "asc src/raster.ts --optimize --runtime stub --outFile src/raster.wasm"
+  },
+  "devDependencies": {"@napi-rs/canvas":"0.1.100","assemblyscript":"0.28.9","jsdom":"26.1.0"}
+}
