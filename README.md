@@ -42,3 +42,7 @@ Open `http://localhost:8000`. Building the HTML needs only Python 3.10 or later.
 - [Content workshop](docs/CONTENT.md) — where to put a course, truck, sponsor or roadside act.
 - [Contributor and release guide](CONTRIBUTING.md) — clean setup, test commands and reproducible handoff.
 - [Credits and asset terms](docs/CREDITS.md) — engine, typefaces, sky maps and catalog data.
+
+## Cloudflare hosting
+
+See the [deployment handoff](docs/CLOUDFLARE.md) for local deployment, GitHub automation, secrets, and custom domains.

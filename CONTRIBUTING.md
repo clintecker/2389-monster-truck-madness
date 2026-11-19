@@ -28,3 +28,5 @@ For a race regression, include the truck, tires, suspension, transmission, cours
 2. Open the built HTML directly, drive through green, then inspect a new truck and the finish show. Test the browser's **Save offline** control.
 3. Check the release bytes with `git diff --exit-code -- dist/index.html` after the generated output has been committed. The builder embeds its own shell so an in-game download can reproduce the distribution.
 4. Publish the tested file as the static root or attach it to a release. The live game's hosting account and credentials are managed separately.
+
+For Cloudflare releases, follow [the deployment handoff](docs/CLOUDFLARE.md). PRs validate automatically; production deployment remains disabled until the operator configures it.
