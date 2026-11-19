@@ -5,6 +5,7 @@ import { MTMCelestial } from './celestial.js';
 import { MTMCrowd } from './crowd.js';
 import { MTMElectric } from './electric.js';
 import { MTMFinish } from './finish.js';
+import { MTMFitmentArt } from './fitment-sprites.js';
 import { MTMMidway } from './midway.js';
 import { MTMOddities } from './oddities.js';
 import { MTMPhysics } from './physics.js';

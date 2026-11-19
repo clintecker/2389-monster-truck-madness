@@ -4,6 +4,7 @@
 import { MTMCelestial } from './celestial.js';
 import { MTMFinish } from './finish.js';
 import { MTMKit } from './kit.js';
+import { MTMScenery } from './scenery.js';
 
 const MTMTrack = (() => {
   const T=THREE,{clamp, rng, canvas, map} = MTMKit;
