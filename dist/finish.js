@@ -1,5 +1,6 @@
 /* The runoff and all show cues share finish-relative coordinates. Positive v
    points through the timing beam. Circuit runoffs peel away from the next lap. */
+import { MTMCrowd } from './crowd.js';
 const MTMFinish=(()=>{
   const cache=new WeakMap(),tau=Math.PI*2;
   function venue(c){
@@ -32,11 +33,13 @@ const MTMFinish=(()=>{
     }
     const colors=['#ff709d','#70eddf','#ffe28a','#af9aff','#79bbff'];
     const fans=[];
-    for(let i=0;i<42;i++){const a=(i-20.5)*.089;
-      for(let tier=0;tier<3;tier++){const r=34+tier*1.65,h=1+tier*.95;
-        face([[...ring(r,a-.043),h],[...ring(r,a+.043),h],[...ring(r+1.6,a+.043),h],[...ring(r+1.6,a-.043),h]],'#687186');
-        face([[...ring(r,a-.043),0],[...ring(r,a+.043),0],[...ring(r,a+.043),h],[...ring(r,a-.043),h]],'#364258');
-        fans.push({q:point(...ring(r+.8,a),h),i:i*3+tier});
+    // Five tiers of terraced seating hold a full crowd; the seated rig from
+    // the grandstands populates every seat as a real figure at attach time.
+    for(let i=0;i<58;i++){const a=(i-28.5)*.0675;
+      for(let tier=0;tier<5;tier++){const r=34+tier*1.62,h=1.05+tier*.92;
+        face([[...ring(r,a-.034),h],[...ring(r,a+.034),h],[...ring(r+1.6,a+.034),h],[...ring(r+1.6,a-.034),h]],tier%2?'#687186':'#5f6880');
+        face([[...ring(r,a-.034),0],[...ring(r,a+.034),0],[...ring(r,a+.034),h],[...ring(r,a-.034),h]],'#364258');
+        fans.push({q:point(...ring(r+.78,a),h),i:i*5+tier,a,tier,r});
       }
     }
     ['CCVAULT • CLAIM YOUR LOST LAP','MUX • ALL LANES MERGE','2389 VICTORY MOTOR POOL','REVIEW-SQUAD • DENT APPROVED','CAUTION • LOAD BEARING APPLAUSE'].forEach((title,i)=>{
@@ -135,6 +138,107 @@ const MTMFinish=(()=>{
         emit({lift,kind:s.kind,seed:s.seed,rack:s.time,distance,delay:Math.max(0,distance/343-(time-when)),venue:course.id});
       }
   }
+  // ---- drone salute -------------------------------------------------------
+  // 112 quadcopters fly one choreographed program per 24 s show loop. Every
+  // position is a pure function of the clock, so a tour frame, a suspended
+  // tab and a replay all see the same fleet. Shapes are painted on a coarse
+  // grid in formation space (x across the bowl, y up, z downrange); the
+  // program maps each drone's roster slot to a grid cell per act.
+  const droneCount=112,droneAlt=27;
+  // Grid stamps, drawn top row first. '#' lights the hull, '.' is a spacer.
+  const droneActs=[
+    // 3.0-7.5: a slowly rotating ring with a bright leading arc.
+    {until:7.5,stamp:null,ring:true},
+    // 7.5-12.5: checkered banner.
+    {until:12.5,stamp:['################','#..............#','#.##.##.##.##.##','#.##.##.##.##.##','#..............#','#.##.##.##.##.##','#.##.##.##.##.##','#..............#','################']},
+    // 12.5-17.5: heart.
+    {until:17.5,stamp:['..####....####..','.######..######.','################','################','################','.##############.','..############..','....########....','......####......','.......##.......']},
+    // 17.5-21.5: the fleet mark digits, four columns like the LED board.
+    {until:21.5,stamp:['#.##.#..##..##..#..#..##..##..##','#####..#####.####.####.####..###','..##....##....##....##....##..##','..##....##....##....##....##..##','..##....##....##....##....##..##','..##....##....##....##....##..##','..##....##....##....##....##..##']},
+  ];
+  // Per-drone stable jitter: launch pad angle, bob phase and flicker phase.
+  const dronePad=i=>{const a=i*tau/droneCount;return [a,Math.sin(i*12.9898)*43758.5453%1,Math.sin(i*78.233)%1];};
+  // Cell stamps for the shaped acts; droneProgram flattens each stamp into
+  // [u,w] pairs across formation space, top row first.
+  function droneProgram(stamp){
+    // Flatten a stamp into [u,w] pairs in formation space, top row first.
+    const cells=[];
+    if(stamp){
+      const rows=stamp.length,cols=Math.max(...stamp.map(r=>r.length));
+      for(let r=0;r<rows;r++)for(let c=0;c<stamp[r].length;c++)if(stamp[r][c]==='#')cells.push([c/(cols-1),1-r/(rows-1)]);
+    }
+    return cells;
+  }
+  const droneCells=droneActs.filter(a=>a.stamp).map(a=>({until:a.until,cells:droneProgram(a.stamp)}));
+  function drones(v,t){
+    const clock=t%period;
+    if(clock<2.6)return null;              // still on the pads during the opener
+    const spin=clock*.14;
+    const picks=[];
+    for(let i=0;i<droneCount;i++){
+      const [padAngle,seedA,seedB]=dronePad(i);
+      // Every drone starts on a launch pad in a ring around the bowl, climbs
+      // out over the first 2.4 s of the program, then flies its act.
+      const rise=Math.min(1,(clock-2.6)/2.4),lift=(1-Math.cos(rise*Math.PI))*.5;
+      const padR=41,padX=Math.cos(padAngle)*padR,padZ=Math.sin(padAngle)*padR*.62;
+      let x,y,z;
+      if(clock<7.5){
+        // Act one: a double ring at two heights, rotating; 96 drones fly the
+        // rings and the remaining 16 hold a slow carousel core.
+        const ring=i%2,r=i<96?26+ring*7:9,a=padAngle+spin*(ring?1:-1.4)+i*.013;
+        const fx=Math.cos(a)*r,fz=Math.sin(a)*r*.62,fy=droneAlt+ring*5.4+Math.sin(clock*1.3+seedA*9)*0.9;
+        x=padX+(fx-padX)*lift;z=padZ+(fz-padZ)*lift;y=fy*lift+(6+seedB*2)*(1-lift);
+      }else{
+        const act=droneCells.find(a=>clock<a.until)||droneCells[droneCells.length-1];
+        const cells=act.cells,k=i%cells.length;
+        const [u,w]=cells[k];
+        // Scatter: every drone approaches its cell from its launch pad.
+        const settle=Math.min(1,(clock-7.5)/1.7),e=(1-Math.cos(settle*Math.PI))*.5;
+        const fx=(u*2-1)*24,fz=(w*2-1)*16,fy=droneAlt+(w-.5)*13;
+        const scatterA=padAngle+clock*.5,sr=(1-e)*17;
+        x=padX+(fx-padX)*e+Math.cos(scatterA)*sr*(1-e);z=padZ+(fz-padZ)*e+Math.sin(scatterA)*sr*(1-e)*.6;y=(6+seedB*2)+(fy-(6+seedB*2))*e-(1-e)*(seedB*6);
+        // The formation breathes and wheels as one body.
+        const ca=Math.cos(spin*.9),sa=Math.sin(spin*.9);
+        const rx=x*ca-z*sa,z2=x*sa+z*ca;x=rx;z=z2;
+      }
+      // Convert formation space through the venue frame.
+      const q=v.point(v.cu+x,v.cv+z,y);picks.push({q,i,seedA});
+    }
+    return picks;
+  }
+  function droneShow(v,t,emit){
+    const picks=drones(v,t);if(!picks)return;
+    const clock=t%period;
+    const act=clock<7.5?0:clock<12.5?1:clock<17.5?2:3;
+    const inks=['#8ff5e2','#ffffff','#ff7fae','#ffd863'];
+    const ink=inks[act];
+    for(const {q,i,seedA} of picks){
+      // Hull: a small diamond; nav strobe: alternating blink per drone.
+      emit([[q[0]-.42,q[1],q[2]],[q[0],q[1]+.30,q[2]],[q[0]+.42,q[1],q[2]],[q[0],q[1]-.22,q[2]]],ink);
+      if(Math.sin(clock*7+seedA*23+i)>.55)emit([[q[0]-.13,q[1]+.34,q[2]],[q[0],q[1]+.62,q[2]],[q[0]+.13,q[1]+.34,q[2]],[q[0],q[1]+.2,q[2]]],'#ffffff');
+    }
+    // A faint guide line traces the formation outline so the shape reads at
+    // distance even when individual hulls collapse to a pixel. Guides ride
+    // the same wheel and settle easing as the fleet, and never cross a row
+    // boundary, so no chord is drawn across the shape.
+    if(act>0){
+      const stamp=droneActs.filter(a=>a.stamp)[act-1].stamp,rows=stamp.length,cols=Math.max(...stamp.map(r=>r.length));
+      const wheel=clock*.14*.9,ca=Math.cos(wheel),sa=Math.sin(wheel);
+      const settle=Math.min(1,(clock-7.5)/1.7),e=(1-Math.cos(settle*Math.PI))*.5,sr=(1-e)*17;
+      const place=(u,w)=>{
+        let x=(u*2-1)*24+Math.cos(u*9+w*5)*sr,z=(w*2-1)*16+Math.sin(u*7+w*3)*sr*.6,y=droneAlt+(w-.5)*13;
+        const rx=x*ca-z*sa;return v.point(v.cu+rx,v.cv+(x*sa+z*ca),y);
+      };
+      for(let r=0;r<rows;r++){
+        const row=stamp[r].split('');
+        for(let c=1;c<cols;c+=7){
+          if(row[c]!=='#'||row[c-1]!=='#')continue;
+          const a=place(c/(cols-1),1-r/(rows-1)),b=place((c-1)/(cols-1),1-r/(rows-1));
+          emit([[a[0],a[1],a[2]],[b[0],b[1],b[2]],[b[0],b[1]+.05,b[2]],[a[0],a[1]+.05,a[2]]],'#4e7f79');
+        }
+      }
+    }
+  }
   function show(v,t,live,emit){
     const {point,cu,cv,colors}=v;
     function line(a,b,w,ink){
@@ -145,23 +249,82 @@ const MTMFinish=(()=>{
       emit([[a[0]-dx,a[1]-dy,a[2]-dz],[a[0]+dx,a[1]+dy,a[2]+dz],[b[0]+dx,b[1]+dy,b[2]+dz],[b[0]-dx,b[1]-dy,b[2]-dz]],ink);
     }
     function light(q,w,h,ink){emit([[q[0]-w,q[1],q[2]],[q[0],q[1]+h,q[2]],[q[0]+w,q[1],q[2]],[q[0],q[1]-h,q[2]]],ink);}
-    for(const {q,i} of v.fans){const k=live?Math.max(0,Math.sin(t*5+i))* .58:0,y=q[1]+k;
-      line([q[0],y,q[2]],[q[0],y+1.05,q[2]],.29,colors[i%5]);light([q[0],y+1.36,q[2]],.23,.29,'#dfaa87');
-      if(live)line([q[0],y+.7,q[2]],[q[0]+.55*Math.sin(i+2*t),y+1.55,q[2]],.09,colors[i%5]);}
+    // The seated bowl crowd is baked geometry; the live layer is the front
+    // rail: arms, phones and thrown lights that surge with every shell break.
+    const showClock=t%period;
+    const active=pyrotechnics(v).find(s=>{const a=showClock-s.time-s.flight;return a>=0&&a<2.6;});
+    const breakPulse=live&&active?1-Math.min(1,(showClock-active.time-active.flight)/2.6):0;
+    const rail=v.fans.filter(f=>f.tier===0);
+    for(const {q,i,a} of rail){
+      const k=live?Math.max(0,Math.sin(t*5+i))*.58:0,y=q[1]+k;
+      line([q[0],y,q[2]],[q[0],y+1.02,q[2]],.24,colors[i%5]);
+      light([q[0],y+1.3,q[2]],.20,.26,'#dfaa87');
+      if(live){
+        const surge=1+breakPulse;
+        line([q[0],y+.66,q[2]],[q[0]+.62*Math.sin(i+2*t)*surge,y+1.5*surge,q[2]],.09,colors[i%5]);
+        if((i%7)===0&&surge>1.4)light([q[0]+.4*Math.sin(i*2.4+t*3),y+1.9,.0+q[2]],.16,.2,'#fff0c9');
+      }
+    }
     if(!live)return;
     // The lighting desk trims the scanning beams during a shell break.
-    const showClock=t%period,breakLight=pyrotechnics(v).some(s=>showClock-s.time-s.flight>=0&&showClock-s.time-s.flight<2.6);
-    const beamInk=breakLight?['#a64576','#408f86','#b2a064','#78639f','#536e97']:colors;
+    const inBreak=!!active;
+    const beamInk=inBreak?['#a64576','#408f86','#b2a064','#78639f','#536e97']:colors;
     for(let i=0;i<6;i++){const a=i*tau/6;
-      line(point(cu+33*Math.sin(a),cv+33*Math.cos(a),2),point(cu+28*Math.sin(a+t*.65),cv+23*Math.cos(a+t*.65),38+5*Math.sin(t+i)),breakLight?.065:.11,beamInk[i%5]);}
+      line(point(cu+33*Math.sin(a),cv+33*Math.cos(a),2),point(cu+28*Math.sin(a+t*.65),cv+23*Math.cos(a+t*.65),38+5*Math.sin(t+i)),inBreak?.065:.11,beamInk[i%5]);}
     fireworks(v,t,line,light);
+    droneShow(v,t,emit);
     for(let n=0;n<4;n++)for(let j=0;j<15;j++)if(digits[n][j]==='1'){const k=n*15+j,a=k*.57+t*.3,f=(1-Math.cos(t*.47))*.5;
       const u=-(n*4+j%3-7.5)*1.65,vv=28-Math.floor(j/3)*1.65;
       light(point(cu+u*(1-f)+Math.cos(a)*14*f,cv+26,vv*(1-f)+(26+7*Math.sin(a))*f),.32,.38,colors[n]);}
   }
+  // Mixer values for the drone fleet: overall presence (0 when grounded or
+  // far away) and lateral pan relative to the listener's facing.
+  function droneMix(v,t,listener){
+    const picks=drones(v,t);if(!picks)return {level:0,pan:0};
+    let sx=0,n=0,near=0,ref=0;
+    for(const {q} of picks){sx+=q[0];n++;}
+    const cx=sx/n;
+    if(listener){
+      let best=Infinity;
+      for(const {q} of picks){const d=Math.hypot(q[0]-listener.x,q[1]-listener.y,q[2]-listener.z);if(d<best)best=d;}
+      near=best;ref=1;
+    }
+    const level=ref?Math.max(0,Math.min(1,1.35-near/115)):1;
+    const ex=listener?listener.x:v.front[0],ez=listener?listener.z:v.front[2];
+    // Lateral offset of the formation center across the gate axis.
+    const lateral=(cx-ex)*v.gate.dz-(v.hub[2]-ez)*v.gate.dx;
+    return {level,pan:Math.max(-1,Math.min(1,lateral/60))};
+  }
   function geometry(faces){const pos=[],col=[];for(const f of faces){const color=new THREE.Color(f.ink);for(const i of [0,1,2,0,2,3]){pos.push(...f.p[i]);col.push(color.r,color.g,color.b);}}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));return g;}
+  // Seat one real grandstand figure per bowl seat. The twelve costumes share
+  // a dozen instanced draws; poses stay static while the live wave layer
+  // rides the dynamic buffer above them.
+  function attachCrowd(world,v){
+    const matte=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});
+    const groups=new Map();
+    for(const {q,i,tier} of v.fans){
+      // The front tier is owned by the animated rail layer in show().
+      if(tier===0)continue;
+      const style=((i*7+Math.round(q[2]*13))%12+12)%12;
+      const list=groups.get(style)||[];groups.set(style,list);list.push(q);
+    }
+    for(const [style,list] of groups){
+      const geo=MTMCrowd.geometry(MTMCrowd.avatar(style,0,true));
+      const mesh=new THREE.InstancedMesh(geo,matte,list.length);
+      mesh.name='Victory bowl crowd';mesh.frustumCulled=false;
+      const m=new THREE.Matrix4(),rot=new THREE.Quaternion(),up=new THREE.Vector3(0,1,0),one=new THREE.Vector3(1,1,1),p=new THREE.Vector3();
+      list.forEach((q,k)=>{
+        rot.setFromAxisAngle(up,Math.atan2(v.hub[0]-q[0],v.hub[2]-q[2]));
+        p.set(q[0],q[1]-.60,q[2]);
+        m.compose(p,rot,one);mesh.setMatrixAt(k,m);
+      });
+      mesh.instanceMatrix.needsUpdate=true;
+      world.add(mesh);
+    }
+  }
   function attach(world,c,board){const v=venue(c),mat=new THREE.MeshBasicMaterial({vertexColors:true,side:THREE.DoubleSide});
     world.add(new THREE.Mesh(geometry(v.faces),mat));
+    attachCrowd(world,v);
     for(const b of v.labels){const sign=new THREE.Mesh(new THREE.PlaneGeometry(19,2.45),new THREE.MeshBasicMaterial({map:board(b.title),side:THREE.DoubleSide}));sign.position.set(...b.p);sign.rotation.y=b.yaw;world.add(sign);}
     const people=[];show(v,0,false,(p,ink)=>people.push({p,ink}));const standing=new THREE.Mesh(geometry(people),mat);world.add(standing);
     // Both GPU and WASM retain these buffers. Collapse unused quads rather
@@ -181,7 +344,7 @@ const MTMFinish=(()=>{
     const g=c.gates.at(-1),dx=x-g.x,dz=z-g.z,u=dx*g.dz-dz*g.dx,v=dx*g.dx+dz*g.dz,cu=c.loop?-32:0;
     return Math.hypot(u-cu,v-59)<34+r||(v>3-r&&v<55+r&&Math.abs(u-cu*Math.max(0,Math.min(1,(v-2)/49)))<c.width*.55+r);
   }
-  return {venue,attach,show,reserved,soundCues};
+  return {venue,attach,show,reserved,soundCues,droneMix};
 })();
 
 export {MTMFinish};

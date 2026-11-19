@@ -593,7 +593,7 @@ const MTMCrowd=(()=>{
         ctx.restore();}});
     });
   }
-  return {plan,attach,draw,react,energy,projectiles};
+  return {plan,attach,draw,react,energy,projectiles,avatar,geometry,frames};
 })();
 
 export {MTMCrowd};

@@ -158,8 +158,10 @@ const MTMFinish=(()=>{
   ];
   // Per-drone stable jitter: launch pad angle, bob phase and flicker phase.
   const dronePad=i=>{const a=i*tau/droneCount;return [a,Math.sin(i*12.9898)*43758.5453%1,Math.sin(i*78.233)%1];};
-  function droneProgram(t,stamp){
-    // Return [x,y,z,ink] per drone. Formation space spans x -26..26, z -20..20.
+  // Cell stamps for the shaped acts; droneProgram flattens each stamp into
+  // [u,w] pairs across formation space, top row first.
+  function droneProgram(stamp){
+    // Flatten a stamp into [u,w] pairs in formation space, top row first.
     const cells=[];
     if(stamp){
       const rows=stamp.length,cols=Math.max(...stamp.map(r=>r.length));
@@ -167,7 +169,7 @@ const MTMFinish=(()=>{
     }
     return cells;
   }
-  const droneCells=droneActs.filter(a=>a.stamp).map(a=>({until:a.until,cells:droneProgram(0,a.stamp)}));
+  const droneCells=droneActs.filter(a=>a.stamp).map(a=>({until:a.until,cells:droneProgram(a.stamp)}));
   function drones(v,t){
     const clock=t%period;
     if(clock<2.6)return null;              // still on the pads during the opener
@@ -175,23 +177,26 @@ const MTMFinish=(()=>{
     const picks=[];
     for(let i=0;i<droneCount;i++){
       const [padAngle,seedA,seedB]=dronePad(i);
-      // Launch climb from the ring of pad positions at r=41 to formation height.
+      // Every drone starts on a launch pad in a ring around the bowl, climbs
+      // out over the first 2.4 s of the program, then flies its act.
       const rise=Math.min(1,(clock-2.6)/2.4),lift=(1-Math.cos(rise*Math.PI))*.5;
+      const padR=41,padX=Math.cos(padAngle)*padR,padZ=Math.sin(padAngle)*padR*.62;
       let x,y,z;
       if(clock<7.5){
-        // Act one: a double ring at two heights, rotating; slots 0-83 fly the
-        // rings, the remaining 29 form a slow carousel core.
+        // Act one: a double ring at two heights, rotating; 96 drones fly the
+        // rings and the remaining 16 hold a slow carousel core.
         const ring=i%2,r=i<96?26+ring*7:9,a=padAngle+spin*(ring?1:-1.4)+i*.013;
-        x=Math.cos(a)*r;z=Math.sin(a)*r*.62;y=droneAlt+ring*5.4+Math.sin(clock*1.3+seedA*9)*0.9;
+        const fx=Math.cos(a)*r,fz=Math.sin(a)*r*.62,fy=droneAlt+ring*5.4+Math.sin(clock*1.3+seedA*9)*0.9;
+        x=padX+(fx-padX)*lift;z=padZ+(fz-padZ)*lift;y=fy*lift+(6+seedB*2)*(1-lift);
       }else{
         const act=droneCells.find(a=>clock<a.until)||droneCells[droneCells.length-1];
         const cells=act.cells,k=i%cells.length;
         const [u,w]=cells[k];
-        // Scatter: every drone approaches its cell from a personal spiral.
+        // Scatter: every drone approaches its cell from its launch pad.
         const settle=Math.min(1,(clock-7.5)/1.7),e=(1-Math.cos(settle*Math.PI))*.5;
         const fx=(u*2-1)*24,fz=(w*2-1)*16,fy=droneAlt+(w-.5)*13;
         const scatterA=padAngle+clock*.5,sr=(1-e)*17;
-        x=fx+Math.cos(scatterA)*sr;z=fz+Math.sin(scatterA)*sr*.6;y=fy-(1-e)*(6+seedB*8);
+        x=padX+(fx-padX)*e+Math.cos(scatterA)*sr*(1-e);z=padZ+(fz-padZ)*e+Math.sin(scatterA)*sr*(1-e)*.6;y=(6+seedB*2)+(fy-(6+seedB*2))*e-(1-e)*(seedB*6);
         // The formation breathes and wheels as one body.
         const ca=Math.cos(spin*.9),sa=Math.sin(spin*.9);
         const rx=x*ca-z*sa,z2=x*sa+z*ca;x=rx;z=z2;
@@ -213,13 +218,24 @@ const MTMFinish=(()=>{
       if(Math.sin(clock*7+seedA*23+i)>.55)emit([[q[0]-.13,q[1]+.34,q[2]],[q[0],q[1]+.62,q[2]],[q[0]+.13,q[1]+.34,q[2]],[q[0],q[1]+.2,q[2]]],'#ffffff');
     }
     // A faint guide line traces the formation outline so the shape reads at
-    // distance even when individual hulls collapse to a pixel.
+    // distance even when individual hulls collapse to a pixel. Guides ride
+    // the same wheel and settle easing as the fleet, and never cross a row
+    // boundary, so no chord is drawn across the shape.
     if(act>0){
-      const cells=droneCells[act-1].cells;
-      for(let k=1;k<cells.length;k+=7){
-        const [u0,w0]=cells[k-1],[u1,w1]=cells[k];
-        const a=v.point(v.cu+(u0*2-1)*24,v.cv+(w0*2-1)*16,droneAlt+(w0-.5)*13),b=v.point(v.cu+(u1*2-1)*24,v.cv+(w1*2-1)*16,droneAlt+(w1-.5)*13);
-        emit([[a[0],a[1],a[2]],[b[0],b[1],b[2]],[b[0],b[1]+.05,b[2]],[a[0],a[1]+.05,a[2]]],'#4e7f79');
+      const stamp=droneActs.filter(a=>a.stamp)[act-1].stamp,rows=stamp.length,cols=Math.max(...stamp.map(r=>r.length));
+      const wheel=clock*.14*.9,ca=Math.cos(wheel),sa=Math.sin(wheel);
+      const settle=Math.min(1,(clock-7.5)/1.7),e=(1-Math.cos(settle*Math.PI))*.5,sr=(1-e)*17;
+      const place=(u,w)=>{
+        let x=(u*2-1)*24+Math.cos(u*9+w*5)*sr,z=(w*2-1)*16+Math.sin(u*7+w*3)*sr*.6,y=droneAlt+(w-.5)*13;
+        const rx=x*ca-z*sa;return v.point(v.cu+rx,v.cv+(x*sa+z*ca),y);
+      };
+      for(let r=0;r<rows;r++){
+        const row=stamp[r].split('');
+        for(let c=1;c<cols;c+=7){
+          if(row[c]!=='#'||row[c-1]!=='#')continue;
+          const a=place(c/(cols-1),1-r/(rows-1)),b=place((c-1)/(cols-1),1-r/(rows-1));
+          emit([[a[0],a[1],a[2]],[b[0],b[1],b[2]],[b[0],b[1]+.05,b[2]],[a[0],a[1]+.05,a[2]]],'#4e7f79');
+        }
       }
     }
   }
@@ -274,9 +290,9 @@ const MTMFinish=(()=>{
       near=best;ref=1;
     }
     const level=ref?Math.max(0,Math.min(1,1.35-near/115)):1;
-    const ear=listener||v.front,yaw=Math.atan2(v.gate.dx,v.gate.dz);
+    const ex=listener?listener.x:v.front[0],ez=listener?listener.z:v.front[2];
     // Lateral offset of the formation center across the gate axis.
-    const lateral=(cx-ear[0])*v.gate.dz-(v.hub[2]-ear[2])*v.gate.dx;
+    const lateral=(cx-ex)*v.gate.dz-(v.hub[2]-ez)*v.gate.dx;
     return {level,pan:Math.max(-1,Math.min(1,lateral/60))};
   }
   function geometry(faces){const pos=[],col=[];for(const f of faces){const color=new THREE.Color(f.ink);for(const i of [0,1,2,0,2,3]){pos.push(...f.p[i]);col.push(color.r,color.g,color.b);}}const g=new THREE.BufferGeometry();g.setAttribute('position',new THREE.Float32BufferAttribute(pos,3));g.setAttribute('color',new THREE.Float32BufferAttribute(col,3));return g;}
@@ -286,7 +302,9 @@ const MTMFinish=(()=>{
   function attachCrowd(world,v){
     const matte=new THREE.MeshLambertMaterial({vertexColors:true,side:THREE.DoubleSide});
     const groups=new Map();
-    for(const {q,i} of v.fans){
+    for(const {q,i,tier} of v.fans){
+      // The front tier is owned by the animated rail layer in show().
+      if(tier===0)continue;
       const style=((i*7+Math.round(q[2]*13))%12+12)%12;
       const list=groups.get(style)||[];groups.set(style,list);list.push(q);
     }
@@ -297,7 +315,7 @@ const MTMFinish=(()=>{
       const m=new THREE.Matrix4(),rot=new THREE.Quaternion(),up=new THREE.Vector3(0,1,0),one=new THREE.Vector3(1,1,1),p=new THREE.Vector3();
       list.forEach((q,k)=>{
         rot.setFromAxisAngle(up,Math.atan2(v.hub[0]-q[0],v.hub[2]-q[2]));
-        p.set(q[0],q[1]-1.04,q[2]);
+        p.set(q[0],q[1]-.60,q[2]);
         m.compose(p,rot,one);mesh.setMatrixAt(k,m);
       });
       mesh.instanceMatrix.needsUpdate=true;

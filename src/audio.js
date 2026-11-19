@@ -774,8 +774,8 @@ const MTMAudio = (() => {
   // position-dependent stereo image. The bus lives for the whole session;
   // the gain follows the fleet's presence and distance each frame.
   function buildDroneBus() {
-    const ctx = audio.ctx;
-    const out = ctx.createGain();out.gain.value = 0;out.connect(sfx);
+    const {ctx, master} = audio;
+    const out = ctx.createGain();out.gain.value = 0;
     const buzz = ctx.createOscillator();buzz.type = 'sawtooth';buzz.frequency.value = 86;
     const buzzShape = ctx.createBiquadFilter();buzzShape.type = 'lowpass';buzzShape.frequency.value = 320;buzzShape.Q.value = .8;
     const blades = ctx.createGain();blades.gain.value = .55;

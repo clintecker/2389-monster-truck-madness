@@ -1967,7 +1967,7 @@ const MTMScenery = (() => {
       reserve(p,Math.max(rx,rz)*1.58);
       if(!slim && i%2===0){
         const token=relative(p,side*rx*1.62,0,rz*.37);
-        if(clear(token.x,token.z,13)){mesa(stage, token.x,token.z,8,10,h*.78,'needle');reserve(token,12);}
+        if(clear(token.x,token.z,13)){mesa(stage, token.x,token.z,8,10,h*.78,'needle');reserve(token,16);}
       }
     }
     const cx=(minX+maxX)/2,cz=(minZ+maxZ)/2;

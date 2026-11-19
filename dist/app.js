@@ -368,6 +368,14 @@ import { MTMFitmentArt } from './fitment-sprites.js';
     return {throttle:Math.max(down('KeyW','ArrowUp')||touch.has('throttle')?1:0,b(7),b(0)),brake:Math.max(down('KeyS','ArrowDown')||touch.has('brake')?1:0,b(6),b(2)),steer:cap((down('KeyA','ArrowLeft')||touch.has('left')?1:0)-(down('KeyD','ArrowRight')||touch.has('right')?1:0)-(Math.abs(ax)>.12?(Math.abs(ax)-.12)/.88*Math.sign(ax):0)+b(14)-b(15),-1,1),handbrake:down('Space')||touch.has('handbrake')||b(1)>.4};}
   function padActions(pad){const btn=i=>(pad?.buttons[i]?.value||0)>.5,edge=i=>btn(i)&&!prevPad[i];if(pad){if(edge(9)){if(state==='paused'&&dialog==='pause')resume();else if(state==='home'&&!dialog){series=null;start(cfg.event);}else pause();}if(!dialog){if(edge(3))camera();if(edge(4))rescue();if(edge(10))horn();if(edge(12))shift(1);if(edge(13))shift(-1);}if(state==='home'&&!dialog&&(edge(14)||edge(15)))select((cfg.event+(edge(14)?cs.length-1:1))%cs.length);}prevPad={};for(const i of [3,4,9,10,12,13,14,15])prevPad[i]=btn(i);}
   for(const ev of ['gamepadconnected','gamepaddisconnected'])window.addEventListener(ev,()=>{$('padStatus').textContent=getPad()?'Gamepad connected':'Gamepad supported';});
+  // The drone salute is audible whenever the fleet is airborne and close
+  // enough; the mixer turns it down with distance and pans across the bowl.
+  function droneSound(t,listener){
+    if(cfg.muted||!g?.c)return;
+    const v=MTMFinish.venue(g.c);
+    const mix=MTMFinish.droneMix(v,t,listener);
+    A.drones(mix.level,mix.pan);
+  }
   function listenToFans(clock){
     if(!g?.c.crowd||audioBackground||cfg.muted)return;
     const mix=V.crowdMix(g,clock);A.crowd(mix.level,mix.pan,clock,mix.energy);
@@ -437,7 +445,7 @@ import { MTMFitmentArt } from './fitment-sprites.js';
     $('startFill').style.transform='scaleX('+g.p.wheelspin.toFixed(3)+')';
   }
   let lastHUD=0;
-  function loop(now){raf=requestAnimationFrame(loop);const raw=last?Math.max(0,(now-last)/1000):0,dt=Math.min(raw,.55);last=now;if(document.hidden)return;const pad=getPad();padActions(pad);if(dialog==='garage'){V.garageFrame(dt);return;}if(state==='tour'){g.tourTime+=dt;if(g.tourStop?.kind==='finish')MTMFinish.soundCues(g.c,g.tourTime-dt,g.tourTime,null,cue=>A.effect('firework',cue));V.tour(g,g.tourStop,g.tourTime);listenToFans(g.tourTime);return;}if(!g||['home','paused','loading','results'].includes(state))return;
+  function loop(now){raf=requestAnimationFrame(loop);const raw=last?Math.max(0,(now-last)/1000):0,dt=Math.min(raw,.55);last=now;if(document.hidden)return;const pad=getPad();padActions(pad);if(dialog==='garage'){V.garageFrame(dt);return;}if(state==='tour'){g.tourTime+=dt;if(g.tourStop?.kind==='finish'){MTMFinish.soundCues(g.c,g.tourTime-dt,g.tourTime,null,cue=>A.effect('firework',cue));droneSound(g.tourTime,null);}V.tour(g,g.tourStop,g.tourTime);listenToFans(g.tourTime);return;}if(!g||['home','paused','loading','results'].includes(state))return;
     if(now>messageUntil)$('raceMessage').classList.remove('on');
     if(state==='replay'){replay(dt);return;}
     const inp=input(pad),step=MTMMotion.step;
@@ -470,6 +478,7 @@ import { MTMFitmentArt } from './fitment-sprites.js';
       const previousShow=g.paradeTime;fin-=dt;acc+=dt;
       while(acc>=step){motion.beforeStep();P.drive(g,inp,step);g.paradeTime+=step;acc-=step;}
       MTMFinish.soundCues(g.c,previousShow,g.paradeTime,g.p,cue=>A.effect('firework',cue));
+      droneSound(g.paradeTime,g.p);
       g.events.length=0;
       if(fin<23&&fin>22)countText('');
       if(fin<23&&fin>22.8)message(g.c.loop?'Bear right into the victory bowl':'Victory bowl ahead · brake for the turnaround',3);
