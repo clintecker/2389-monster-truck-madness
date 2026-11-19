@@ -15,7 +15,7 @@ Pick **Classic cup** for the original desert, figure eight and drag events. **Af
 | Recover to the course | R or H | LB |
 | Pause | Esc or P | Menu |
 
-![Orrery Orbital in the garage with tire, suspension, gear and camera controls](images/garage.jpg)
+![The three research rigs on deep-tread tires, from left to right: Mux Switchblade, Orrery Orbital and Soloclaw](images/garage.jpg)
 
 **Launch.** During the countdown the grid holds the truck while its wheels spin. Get into first gear for a manual launch. Open the throttle on two for a boost. Holding full throttle too early can bog the start.
 

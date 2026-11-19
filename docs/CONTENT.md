@@ -12,6 +12,8 @@ Use `forDistance` and `recordKey` to keep different physical routes and distance
 
 Use the same model construction for the race and showroom. Add an actual front/rear fitment sheet and wheel portraits to `fitment-sprites.js` for the Canvas path. Wire its home image through `style.css` and the builder, set sensible garage defaults and review its contact weight. Verify all tire/stance combinations, restart a race after refitting, and sideswipe another truck. Test a tournament with the new vehicle so the standings include its ID.
 
+After editing a research rig, run `node tools/bake-research-fleet.cjs` to regenerate its Canvas views from the race mesh. Each sheet holds three tire choices across and three suspension settings down. The garage cover is a separate wide illustration with the vehicle on the right so the lobby controls stay readable.
+
 ## Sell a project to the wrong audience
 
 A short two-line pitch survives a drive-by. Reserve the long joke for the tour. The audience is part of the gag: Dot Viewer advertises **MAP THE MUSTARD** to hot dog vendors and **TILT THE GRAPH** to pinball players.

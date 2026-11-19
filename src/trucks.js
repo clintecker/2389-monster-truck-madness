@@ -509,13 +509,68 @@
     const black='#202634',silver='#88999e',dark='#263b48',window='#75b6c1';
     function plated(sections,cols){loft(shell,sections.map(([z,w,low,high,roof])=>[z,[[-w*.89,low],[-w,low+.17],[-roof,high],[roof,high],[w,low+.17],[w*.89,low]]]),cols);}
     function cable(path,r,col,batch=shell){for(let k=1;k<path.length;k++)rod(batch,path[k-1],path[k],r,col,high?10:6);}
-    plated([[-2.65,.97,1.54,1.90,.92],[-2.24,1.04,1.42,2.08,1.0],[1.88,1.03,1.46,2.09,1.0],[2.61,.92,1.60,1.92,.79]],[d.ink,d.paint,d.highlight,d.paint,d.ink,black]);
+    // Stations run from tail to nose. The sill, beltline and deck heights form
+    // a utility bed, a fastback, or a stepped recovery hood around the same axles.
+    const profiles=[
+      [[-2.70,1.03,1.52,2.19],[-2.43,1.16,1.41,2.28],[-.33,1.16,1.42,2.28],[.18,1.02,1.33,2.12],[1.78,1.09,1.42,2.18],[2.60,.94,1.55,2.07]],
+      [[-2.72,.76,1.70,2.38],[-2.27,1.12,1.47,2.30],[-1.56,1.20,1.44,2.35],[-.35,1.01,1.35,2.08],[.70,1.03,1.33,2.09],[1.78,1.17,1.45,2.17],[2.69,.80,1.63,1.96]],
+      [[-2.67,.92,1.52,2.28],[-2.28,1.14,1.45,2.40],[-.78,1.14,1.36,2.38],[-.30,.97,1.38,2.13],[.31,1.15,1.46,2.19],[1.99,1.16,1.55,2.27],[2.72,.99,1.67,2.12]]
+    ];
+    const profile=profiles[id-4];
+    loft(shell,profile.map(([z,w,low,top])=>[z,[[-w*.87,low],[-w,low+.10],[-w,top-.09],[-w*.87,top],[w*.87,top],[w,top-.09],[w,low+.10],[w*.87,low]]]),
+      [d.ink,d.paint,d.highlight,d.paint,d.highlight,d.paint,d.ink,black]);
+
+    // Wrap the artwork around the actual flanks. Reverse the UV direction on
+    // the passenger side so numbers and sponsor lettering read from either side.
     for(const side of [-1,1]){
-      box(steel,side*1.05,1.68,-.06,.16,.12,4.3,silver);
-      box(glow,side*1.075,1.91,-.04,.048,.065,4.20,d.accent);
-      box(glow,side*.72,1.88,2.607,.34,.105,.049,d.lamp);
-      box(glow,side*.71,1.77,-2.66,.35,.10,.05,'#ff5e79');
-      for(const z of [-1.67,1.67]){box(shell,side*1.09,1.93,z,.47,.15,1.20,d.paint);box(glow,side*1.325,1.96,z,.035,.036,.91,d.trim);}
+      const cv=document.createElement('canvas');cv.width=1024;cv.height=192;
+      const c=cv.getContext('2d'),shade=c.createLinearGradient(0,0,0,192);
+      shade.addColorStop(0,d.highlight);shade.addColorStop(.3,d.paint);shade.addColorStop(1,d.ink);
+      c.fillStyle=shade;c.fillRect(0,0,1024,192);
+      c.save();if(side<0){c.translate(1024,0);c.scale(-1,1);}
+      if(id===4){
+        for(let n=0;n<5;n++)trace(c,[[0,25+n*15],[195,25+n*15],[285,112+n*12],[683,112+n*12],[775,30+n*12],[1024,30+n*12]],n%2?d.trim:d.accent,6);
+      }else if(id===5){
+        for(let n=0;n<5;n++){c.beginPath();c.ellipse(510,135,540-n*34,65-n*9,-.16,0,2*Math.PI);c.strokeStyle=n%2?d.trim:d.highlight;c.lineWidth=4;c.stroke();}
+        for(let n=0;n<54;n++){const x=(n*193)%1024,y=(n*n*19+11)%192;c.fillStyle='#fff0c5';c.fillRect(x,y,n%5?2:5,n%5?2:5);}
+      }else{
+        for(let x=-90;x<1100;x+=103)poly2(c,[[x,0],[x+44,0],[x-18,117],[x-80,160]],d.ink);
+        trace(c,[[0,175],[340,155],[520,181],[1024,116]],d.accent,9);
+      }
+      c.restore();type(c,d.name.toUpperCase(),512,94,64,'#fff2ce',d.ink,10);
+      for(const x of [84,940])type(c,d.number,x,85,80,'#fff0cc',d.ink,8);
+      fleetMark(c,512,155,27,d.accent);
+      const tex=new T.CanvasTexture(cv);tex.colorSpace=T.SRGBColorSpace;tex.anisotropy=4;
+      const ink=new Batch(new T.MeshPhongMaterial({map:tex,shininess:48}));
+      function edge([z,w,low,top]){
+        const x=side*(w+.005);
+        return [[x,low+.10,z],[x,top-.09,z]];
+      }
+      function u(z){const t=(z-profile[0][0])/(profile[profile.length-1][0]-profile[0][0]);return side>0?1-t:t;}
+      for(let n=1;n<profile.length;n++){
+        const a=edge(profile[n-1]),b=edge(profile[n]),u0=u(profile[n-1][0]),u1=u(profile[n][0]);
+        ink.quad([a[0],b[0],b[1],a[1]],'#ffffff',[[u0,0],[u1,0],[u1,1],[u0,1]],[side,0,0]);
+      }
+      ink.mesh(sub);
+      rod(steel,[side*1.02,1.37,-1.06],[side*1.02,1.37,1.05],.068,silver);
+      // Form the arches from overlapping sections so the tires show through.
+      for(const z of [-1.67,1.67]){
+        const arch=[];
+        for(let step=0;step<=8;step++){
+          const angle=Math.PI*step/8,dy=Math.sin(angle);
+          arch.push([z-.76*Math.cos(angle),[[side*.99,1.65+.67*dy],[side*1.27,1.65+.67*dy],[side*1.31,1.72+.68*dy],[side*1.03,1.75+.70*dy]]]);
+        }
+        loft(shell,arch,[d.ink,d.paint,d.highlight,d.paint]);
+      }
+    }
+    const nose=profile[profile.length-1][0];
+    box(steel,0,1.81,nose+.01,1.12,.25,.09,black);
+    for(let slot=0;slot<7;slot++)box(steel,(slot-3)*.14,1.82,nose+.064,.052,.19,.035,silver);
+    for(const side of [-1,1]){
+      box(glow,side*.69,1.88,nose+.06,.24,.12,.047,d.lamp);
+      box(glow,side*.72,1.90,profile[0][0]-.04,.26,.10,.05,'#ff5e79');
+      box(steel,side*.95,2.56,id===6?-1.14:1.10,.25,.055,.055,silver);
+      box(shell,side*1.09,2.60,id===6?-1.14:1.10,.11,.18,.15,d.ink);
     }
     function cab(z,w,h,col){
       plated([[z-.86,w,1.97,h,w*.85],[z-.57,w,1.97,h+.07,w*.82],[z+.29,w,1.97,h+.04,w*.76],[z+.97,w*.88,1.99,2.43,w*.79]],[col,col,col,col,col,black]);
@@ -572,7 +627,7 @@
     ctx.fillStyle='#f3f7e8';ctx.font='bold 24px monospace';ctx.fillText('2389 RESEARCH  /  '+d.number,256,94);
     const tex=new T.CanvasTexture(cv);tex.colorSpace=T.SRGBColorSpace;
     const label=new T.MeshBasicMaterial({map:tex});
-    for(const [x,y,z,yaw,w,h] of [[0,1.91,-2.68,Math.PI,1.67,.37],[1.054,1.93,0,Math.PI/2,1.5,.31],[-1.054,1.93,0,-Math.PI/2,1.5,.31]]){
+    for(const [x,y,z,yaw,w,h] of [[0,1.96,profile[0][0]-.012,Math.PI,1.44,.33]]){
       const sign=new T.Mesh(new T.PlaneGeometry(w,h),label);sign.position.set(x,y,z);sign.rotation.y=yaw;sub.add(sign);
     }
     shell.mesh(sub);steel.mesh(sub);glow.mesh(sub,false);sub.name=d.name;sub.position.y=-bodyPivot;return sub;
