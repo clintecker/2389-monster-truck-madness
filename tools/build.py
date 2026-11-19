@@ -32,5 +32,13 @@ shell = (root / 'interface.html').read_text()
 page = shell.replace('/*__STYLES__*/', css)
 (output / 'index.html').write_text(page, encoding='utf-8', newline='\n')
 
+# Response headers applied by Workers Static Assets (never uploaded as an asset
+# itself). Kept to headers that are safe without a full CSP audit.
+(output / '_headers').write_text(
+    '/*\n'
+    '  X-Content-Type-Options: nosniff\n'
+    '  Referrer-Policy: no-referrer\n',
+    encoding='utf-8', newline='\n')
+
 size = sum(f.stat().st_size for f in output.rglob('*') if f.is_file())
 print(f'{output} ({size:,} bytes, {len(list(output.iterdir()))} files)')

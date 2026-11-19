@@ -76,7 +76,33 @@ For rollback, select the previous deployment in Cloudflare or use
 `npx wrangler rollback <VERSION_ID>`. Disable automatic deployment first if needed
 and revert the bad source commit before re-enabling it.
 
-The distribution is about 7 MB across roughly 60 files; Workers allows 25 MiB per static asset. Do not apply a strict CSP without testing inline styles and the WASM loader.
+The distribution is about 7 MB across roughly 60 files; Workers allows 25 MiB per
+static asset and 20,000 files per version (free tier). Do not apply a strict CSP
+without testing inline styles and the WASM loader.
+
+## First load, caching and version skew
+
+The distribution loads as about 35 requests: the HTML shell, `three.min.js`, then
+the ES module graph. `index.html` carries `modulepreload` links for `app.js`'s
+twelve direct imports, which collapses the module discovery waterfall (Chrome
+fetches the whole reachable graph in parallel; Safari and Firefox preload the
+listed files one level ahead). Verified MIME types from the asset pipeline:
+`.js` serves as `text/javascript`, `.wasm` as `application/wasm`, so module
+scripts and streaming WASM instantiation work without a Worker script.
+
+Caching stays at the Cloudflare default (`Cache-Control: max-age=0,
+must-revalidate` with an `ETag` per file). Repeat visits revalidate every module
+instead of trusting a TTL. That is deliberate: game files are not content-hashed,
+so any `max-age` would serve stale code to a visitor mid-session after a deploy.
+The `_headers` file emitted by `tools/build.py` adds only `X-Content-Type-Options:
+nosniff` and `Referrer-Policy: no-referrer`. If load latency ever demands longer
+cache, introduce hashed filenames first, then raise `max-age` for them.
+
+Version skew between the HTML shell and module files can occur during a deploy
+(Cloudflare documents this for all static-asset Workers). It is benign here:
+module filenames are stable, so an old shell requesting a renamed module is the
+only breaking case, and renames should be avoided for that reason. A hard
+refresh always resolves to a consistent version.
 
 References: [Static assets](https://developers.cloudflare.com/workers/static-assets/),
 [Wrangler](https://developers.cloudflare.com/workers/wrangler/),
