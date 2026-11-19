@@ -730,14 +730,13 @@ const MTMTrucks = (() => {
     const gl=[pt(.08,.65,.016),pt(.41,.65,.016),pt(.73,.92,.016),pt(.38,.92,.016)];
     kit.glass.quad(gl,[tint?'#344a65':'#435d72',tint?'#3d5571':'#536982',tint?'#5b6a90':'#74879e',tint?'#536880':'#637895'],null,normal);
   }
-  // Everything a race-body stage needs: its batches, the samplers over its own
-  // lofted outline, and the spec entry that selects this shell's details.
-  function raceBodyKit(id,high){
-    const spec=bodies[id],d=roster[id];
+  // Everything a body stage needs: its batches, the samplers over its own
+  // lofted outline, and the paint entry that selects this shell's details.
+  function bodyKit(spec,paint,decalMat,high){
     const topProfile=spec.outline.map(([z,y])=>[z,y]),widthProfile=spec.outline.map(([z,,w])=>[z,w]);
     const kit={
-      id,high,spec,d,
-      decal:new Batch(skin(id)),shell:new Batch(paintMaterial),metal:new Batch(metalMaterial),
+      high,spec,d:paint,
+      decal:new Batch(decalMat),shell:new Batch(paintMaterial),metal:new Batch(metalMaterial),
       glass:new Batch(glassMaterial),lit:new Batch(basicLights),
       top:z=>sampleLine(topProfile,z),width:z=>sampleLine(widthProfile,z)
     };
@@ -1014,10 +1013,10 @@ const MTMTrucks = (() => {
   }
   // Four nose assemblies and three different taillight patterns leave a
   // recognizable vehicle at both ends, even with the paint switched off.
-  function fitLamps(kit){
+  function fitLamps(id,kit){
     for(const s of [-1,1]){
-      const nose=raceNoseLamps[kit.id];if(nose)nose(kit,s);
-      raceTailLamps[kit.id](kit,s);
+      const nose=raceNoseLamps[id];if(nose)nose(kit,s);
+      raceTailLamps[id](kit,s);
       rockerStrip(kit,s);
     }
   }
@@ -1098,7 +1097,7 @@ const MTMTrucks = (() => {
   // then the truck's own hardware and finally the shared lighting and bumpers.
   function buildBody(id,high){
     if(id>=4)return worksBody(id,high);
-    const kit=raceBodyKit(id,high);
+    const kit=bodyKit(bodies[id],roster[id],skin(id),high);
     skinFlanks(kit);
     skinEnds(kit);
     stampHood(kit);
@@ -1106,11 +1105,183 @@ const MTMTrucks = (() => {
     glazeCab(kit,walls);
     if(kit.spec.bedFloor!==null)openBed(kit);
     const rearFit=raceRearFits[id];if(rearFit)rearFit(kit);
-    fitLamps(kit);
+    fitLamps(id,kit);
     const noseFit=raceNoseFits[id];if(noseFit)noseFit(kit);
     return assembleRaceBody(kit);
   }
-  function chassis(id,high){
+  // ---- VW Caddy Mk1 Parts Runner #83 --------------------------------------
+  // A prototype body for parts the fleet already carries: the open ladder
+  // chassis, live axles, coilovers, tyres and hub castings are unchanged. It
+  // stays out of `roster` so every published truck ID, garage slot, saved fit
+  // and record keeps its meaning; tools/bake-caddy-preview.cjs builds it for a
+  // same-scale comparison sheet. Stations are the real 4.37 m pickup over its
+  // 2.62 m wheelbase scaled onto the fleet's 3.30 m race wheelbase.
+  const caddyPaint={name:'VW Caddy Mk1 Parts Runner',number:'83',ink:'#1b2233',paint:'#f0b41c',highlight:'#ffd75e',accent:'#f6f2e6',trim:'#bd1f2d',lamp:'#ffe9b4'};
+  const caddyRed='#ba1f2c',caddyGreen='#2e7c4a',caddyBlue='#2050a3';
+  const caddySpec={
+    name:'Caddy Mk1 pickup',style:'caddy',rear:-2.80,front:2.62,br:-.44,tr:-.40,tf:.90,bf:1.04,
+    ry:2.84,rx:.82,cab:.95,crown:.030,archTrim:'#1f252e',hoodCrown:.055,hoodRail:null,bedFloor:1.80,
+    roof:{cuts:[-1,-.65,0,.65,1],arch:u=>1-u*u,camber:.005,pull:0},
+    glazing:{panes:[[0,1]],mirror:true,net:false},
+    // The tailgate rail ends below the cab beltline and the box floor sits just
+    // over the 1.73 m tyre, so the bed stays open and low. Rear arch crown is
+    // 1.93 m, which is as low as a monster-truck bed side can go.
+    outline:[[-2.80,2.06,.96],[-2.66,2.12,.98],[-2.20,2.18,1.00],[-1.64,2.22,1.00],[-1.00,2.24,1.00],
+      [-.52,2.24,1.00],[-.44,2.26,1.00],[1.04,2.26,1.00],[2.20,2.30,1.01],[2.62,2.24,.96]]
+  };
+  // Livery is painted in the same (z,y) frame the flank sheet is unwrapped
+  // from, so the panels land on the real wheel arches and shut lines.
+  function drawCaddySide(c,s){
+    const w=1180,h=460,p=caddyPaint,pos=z=>(sideZ-s*z)/(2*sideZ)*w,py=y=>(sideTop-y)/(sideTop-sideBottom)*h;
+    const shade=stops=>{const g=c.createLinearGradient(0,py(2.26),0,py(1.34));stops.forEach(([t,ink])=>g.addColorStop(t,ink));return g;};
+    const panel=(z0,z1,fill)=>{const x0=pos(z0),x1=pos(z1);c.fillStyle=fill;c.fillRect(Math.min(x0,x1),0,Math.abs(x1-x0),h);};
+    c.fillStyle=shade([[0,p.highlight],[.42,p.paint],[1,'#7a570f']]);c.fillRect(0,0,w,h);
+    panel(-.30,.90,shade([[0,'#e04a5c'],[.44,caddyRed],[1,'#5c0f18']]));             // door skin
+    panel(1.03,2.95,shade([[0,'#58ad72'],[.44,caddyGreen],[1,'#123c1e']]));          // bolt-on front wing
+    const seam=z=>{c.fillStyle='rgba(6,10,18,.62)';c.fillRect(pos(z)-1.5,py(2.30),3,py(1.24)-py(2.30));};
+    seam(-.30);seam(.90);seam(1.035);
+    const crease=(z0,z1,y,ink,thick)=>trace(c,[[pos(z0),py(y)],[pos(z1),py(y)]],ink,thick);
+    crease(-.30,.90,1.665,'rgba(38,8,14,.55)',3);crease(-.30,.90,1.700,'rgba(255,209,208,.30)',1.6);
+    crease(-2.80,-.52,1.985,'rgba(96,66,6,.48)',2.4);crease(-2.80,-.52,1.640,'rgba(96,66,6,.36)',2);
+    crease(1.04,2.62,1.740,'rgba(9,30,14,.40)',2.2);
+    // Door number, then the research mark forward of the rear arch.
+    type(c,'83',pos(.30),py(1.870),96,'#f9f6ee',p.ink,7,.94);
+    fleetMark(c,pos(-.90),py(2.000),18,p.ink);
+    type(c,'R E S E A R C H',pos(-.90),py(1.870),10,p.ink,null,1,.97,false);
+    // A dark rocker shadow closes the sill along the bottom of the flank.
+    c.fillStyle='#1b2233';c.fillRect(0,py(1.615),w,py(1.20)-py(1.615));
+  }
+  // The Mk1 face: one black grille panel between two round lamps, with the
+  // chrome bumper left to the chassis bar below it.
+  function drawCaddyNose(c){
+    const w=670,h=240,bottom=1.54,nose=caddySpec.outline[caddySpec.outline.length-1],top=nose[1],p=caddyPaint;
+    const px=x=>w*.5+x/(2*nose[2])*w,py=y=>(top-y)/(top-bottom)*h;
+    const g=c.createLinearGradient(0,py(top),0,py(bottom));
+    g.addColorStop(0,p.highlight);g.addColorStop(.45,p.paint);g.addColorStop(1,'#7a570f');
+    c.fillStyle=g;c.fillRect(0,0,w,h);
+    c.fillStyle='#14181f';c.fillRect(px(-.86),py(2.20),px(.86)-px(-.86),py(1.74)-py(2.20));
+    for(let i=0;i<4;i++){c.fillStyle=i%2?'#8d949c':'#76808a';c.fillRect(px(-.40),py(1.795+i*.108),px(.40)-px(-.40),3);}
+    for(const s of [-1,1]){
+      const x=px(s*.655),y=py(1.97),r=px(.17)-px(0);
+      c.fillStyle='#0d1117';c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.fill();
+      c.strokeStyle='#aeb4ba';c.lineWidth=3.4;c.beginPath();c.arc(x,y,r,0,Math.PI*2);c.stroke();
+    }
+    c.fillStyle='#1b2233';c.fillRect(0,py(1.620),w,py(bottom)-py(1.620));
+  }
+  // Tailgate: blue with PARTS RUNNER across it, the unit number in one corner
+  // and the pair of round lamps left to their housings below.
+  function drawCaddyTail(c){
+    const w=670,h=240,bottom=1.54,top=caddySpec.outline[0][1],p=caddyPaint;
+    const py=y=>(top-y)/(top-bottom)*h;
+    const g=c.createLinearGradient(0,py(top),0,py(bottom));
+    g.addColorStop(0,'#3f7bd6');g.addColorStop(.42,caddyBlue);g.addColorStop(1,'#102a5c');
+    c.fillStyle=g;c.fillRect(0,0,w,h);
+    poly2(c,[[24,20],[w-24,20],[w-24,h-20],[24,h-20]],null,'rgba(8,20,44,.55)',4);
+    // The rear panel is 1.76 m wide by 0.52 m tall, so the lettering has to be
+    // widened by that ratio to read at true proportions.
+    const stretch=(h/(top-bottom))/(w/(2*caddySpec.outline[0][2]));
+    type(c,'PARTS RUNNER',w*.5,py(1.855),44,'#f7f5ec','#102a5c',7,stretch);
+    type(c,p.number,86,py(1.955),40,'#f7f5ec','#102a5c',6,stretch);
+    type(c,'2389',w-92,py(1.955),22,'#dfe8fa',null,1,stretch,false);
+    c.fillStyle='#0e1f43';c.fillRect(0,py(1.585),w,py(bottom)-py(1.585));
+  }
+  function drawCaddyTop(c,part){
+    const w=400,h=440,p=caddyPaint;
+    const coat=(edge,crest)=>{const g=c.createLinearGradient(0,0,w,0);
+      g.addColorStop(0,edge);g.addColorStop(.52,crest);g.addColorStop(1,edge);
+      c.fillStyle=g;c.fillRect(0,0,w,h);};
+    if(part==='bed'){
+      // A ribbed steel floor, painted along the bed's own length.
+      c.fillStyle='#18242b';c.fillRect(0,0,w,h);
+      for(let i=0;i<14;i++){c.fillStyle=i%2?'#2c3e47':'#354a55';c.fillRect(20+i*26,14,10,412);c.fillStyle='#101a23';c.fillRect(30+i*26,14,4,412);}
+      return;
+    }
+    if(part==='hood'){
+      coat('#163b7d','#356fca');
+      trace(c,[[186,0],[184,220],[186,440]],'rgba(140,180,240,.42)',7);
+      trace(c,[[214,0],[216,220],[214,440]],'rgba(6,20,50,.52)',5);
+      type(c,p.number,200,352,54,'#f3f6fb','#14294f',6,1.34);
+      return;
+    }
+    coat('#a8790c',p.highlight);
+    c.save();c.translate(w,h);c.rotate(Math.PI);
+    type(c,p.number,200,196,124,p.accent,'#8a5c07',10,1.06);
+    type(c,'2389',200,292,26,'#7e5308',null,1,1.06,false);
+    c.restore();
+  }
+  function caddySkin(){
+    if(skins.has('caddy'))return skins.get('caddy');
+    const can=MTMKit.canvas(1024,1024),c=can.getContext('2d');c.scale(.5,.5);
+    panelDraw(c,panels.right,1180,460,d=>drawCaddySide(d,1));panelDraw(c,panels.left,1180,460,d=>drawCaddySide(d,-1));
+    panelDraw(c,panels.front,670,240,drawCaddyNose);panelDraw(c,panels.rear,670,240,drawCaddyTail);
+    ['hood','roof','bed'].forEach(p=>panelDraw(c,panels[p],400,440,d=>drawCaddyTop(d,p)));
+    const tx=new T.CanvasTexture(can);tx.colorSpace=T.SRGBColorSpace;tx.anisotropy=4;
+    const m=new T.MeshPhongMaterial({map:tx,shininess:42,specular:0x404b54});skins.set('caddy',m);return m;
+  }
+  // The Mk1 front wing is a bolt-on pressing: a green blister that stands proud
+  // of the flank and follows the arch, so the fender is a panel and not paint.
+  function caddyWings(kit){
+    const {shell,top,width}=kit;
+    for(const s of [-1,1]){
+      const arch=[];
+      for(let step=0;step<=10;step++){
+        const z=1.64-.93*Math.cos(Math.PI*step/10),low=archY(z),w=width(z)-.004;
+        const band=Math.min(.26,(top(z)-low)*.9);
+        arch.push([z,[[s*w,low+.010],[s*(w+.058),low+band*.28],[s*(w+.058),low+band*.80],[s*w,low+band]]]);
+      }
+      loft(shell,arch,['#2b7043','#3f9459','#57b374','#2f7d4a']);
+    }
+  }
+  function caddyNose(kit){
+    const {metal,lit,d,high}=kit,front=kit.spec.front,z=front+.020;
+    box(kit.shell,0,1.970,z,.86,.44,.050,'#14181f');
+    for(let i=0;i<4;i++)box(metal,0,1.815+i*.105,z+.032,.72,.020,.020,'#8d949c');
+    rod(metal,[0,1.970,z+.030],[0,1.970,z+.048],.082,'#b6bcc2',high?14:8);
+    for(const s of [-1,1]){
+      const x=s*.655;
+      rod(metal,[x,1.970,z-.045],[x,1.970,z+.040],.170,'#aab0b6',high?18:12);
+      rod(lit,[x,1.970,z+.049],[x,1.970,z+.062],.132,d.lamp,high?18:12);
+    }
+  }
+  function caddyTail(kit){
+    const {metal,lit,d,spec,width}=kit,tx=width(spec.rear)*.755,z=spec.rear-.016;
+    for(const s of [-1,1]){
+      box(metal,s*tx,1.660,z,.30,.15,.030,'#2a2f37');
+      box(lit,s*tx,1.660,z-.024,.24,.10,.012,s>0?d.trim:'#ff4a6e');
+    }
+    box(metal,0,1.960,z,.34,.048,.026,'#9aa1a8');
+  }
+  // The cab's back closes to the bed floor: without it the open box looks
+  // straight through the hollow body to the far flank.
+  function caddyBedWall(kit){
+    const {shell,d,spec,width,top}=kit,z=spec.br-.014,w=width(z)-.055;
+    shell.quad([[-w,spec.bedFloor,z],[w,spec.bedFloor,z],[w,top(z)+.02,z],[-w,top(z)+.02,z]],d.ink,null,[0,0,-1]);
+  }
+  function buildCaddyBody(high){
+    const kit=bodyKit(caddySpec,caddyPaint,caddySkin(),high);
+    skinFlanks(kit);
+    skinEnds(kit);
+    stampHood(kit);
+    const walls=loftCab(kit);
+    glazeCab(kit,walls);
+    openBed(kit);
+    caddyBedWall(kit);
+    caddyWings(kit);
+    caddyNose(kit);
+    caddyTail(kit);
+    return assembleRaceBody(kit);
+  }
+  const caddyParts=new Map();
+  // The prototype rig: BIGFOOT's hub casting and chassis on the new body, so a
+  // comparison render puts two bodies beside the same running gear.
+  function makeCaddy(highDetail=true,setup={}){
+    const tires=selection(setup?.tires,0),suspension=selection(setup?.suspension,1),high=!!highDetail;
+    if(!caddyParts.has(high))caddyParts.set(high,{paint:buildCaddyBody(high),chassis:chassis(0,high,caddySpec)});
+    return assemble(0,null,caddyPaint.name,caddyParts.get(high),high,tires,suspension);
+  }
+  // The chassis takes the body stations its bumpers hang from, so a prototype
+  // body of a different length keeps its bars on the end panels.
+  function chassis(id,high,shape=bodies[id]){
     const frame=new Batch(metalMaterial),dark=new Batch(paintMaterial),d=roster[id],van=id===1;
     const rail=van?'#6d4881':id===2?'#3a695c':id===3?'#85415b':'#405675';
     const frameNames=['Open ladder frame','Cross-braced van cradle','Tapered backbone frame','Wide competition spaceframe'];
@@ -1164,7 +1335,7 @@ const MTMTrucks = (() => {
     // The fanged nose and narrow tail have a V-guard. The longbed uses rolled
     // chrome, the panel van a curved tubular bar, and Crusher a square bash bar.
     for(const end of [-1,1]){
-      const bp=bodies[id],z=end>0?bp.front+.031:bp.rear-.033;
+      const bp=shape,z=end>0?bp.front+.031:bp.rear-.033;
       if(id===0){
         rod(frame,[-.97,1.54,z],[.97,1.54,z],.075,'#a3b1b9',high?12:8);
         for(const s of [-1,1])rod(frame,[s*.97,1.54,z],[s*1.02,1.57,z-end*.22],.057,'#8b969a');
@@ -1189,7 +1360,7 @@ const MTMTrucks = (() => {
       }
       rod(frame,[-.43,1.38,z-end*.11],[.43,1.38,z-end*.11],.042,rail);
     }
-    box(frame,0,1.33,bodies[id].rear+.02,.14,.085,.18,'#353c40');
+    box(frame,0,1.33,shape.rear+.02,.14,.085,.18,'#353c40');
     const node=new T.Group();node.name=frameNames[id];frame.mesh(node);dark.mesh(node);return node;
   }
   // The axle housings and differentials are unsprung. A setup change moves the
@@ -1274,13 +1445,13 @@ const MTMTrucks = (() => {
     if(n===undefined||n===null||n==='')return fallback;
     const v=Number(n);return Number.isInteger(v)&&v>=0&&v<=2?v:fallback;
   }
-  function make(index,highDetail=true,setup={}){
-    const num=Number(index),id=Number.isFinite(num)?((Math.trunc(num)%roster.length)+roster.length)%roster.length:0;
-    const tires=selection(setup?.tires,0),suspension=selection(setup?.suspension,1),preset=suspensionSets[suspension];
-    const high=!!highDetail,key=id+':'+high;
-    if(!caches.has(key))caches.set(key,{paint:buildBody(id,high),chassis:chassis(id<4?id:[0,1,3][id-4],high)});
-    const parts=caches.get(key),wheel=wheelGeometry(id,high,tires),root=new T.Group(),body=new T.Group(),wheels=[],spins=[],struts=[];
-    root.name=roster[id].name;body.name='Suspended body';body.position.y=bodyPivot+preset.lift;
+  // One assembly path for every rig: a painted body, its own chassis, the shared
+  // live axles and four corner coilovers. `wheelId` picks the hub casting and
+  // `index` names the roster slot a rig belongs to (null for a prototype).
+  function assemble(wheelId,index,name,parts,high,tires,suspension){
+    const preset=suspensionSets[suspension],wheel=wheelGeometry(wheelId,high,tires);
+    const root=new T.Group(),body=new T.Group(),wheels=[],spins=[],struts=[];
+    root.name=name;body.name='Suspended body';body.position.y=bodyPivot+preset.lift;
     const sprungFrame=parts.chassis.clone(true);sprungFrame.position.y=-bodyPivot;
     const housings=axles(high).clone(true);
     body.add(parts.paint.clone(true),sprungFrame);root.add(housings,body);
@@ -1291,9 +1462,16 @@ const MTMTrucks = (() => {
       const part=cornerSuspension(suspension,side,axle,high),node=part.node.clone(true);
       node.matrixAutoUpdate=false;root.add(node);struts.push({part,node});
     }
-    const model={root,body,wheels,spins,struts,axles:housings.children,index:id,setup:{tires,suspension},bodyRestY:bodyPivot+preset.lift,
+    const model={root,body,wheels,spins,struts,axles:housings.children,index,setup:{tires,suspension},bodyRestY:bodyPivot+preset.lift,
       rideLift:preset.lift,wheelRadius:rollingRadius,wheelWidth:tireSets[tires].width};
     pose(model,0,0,0);return model;
+  }
+  function make(index,highDetail=true,setup={}){
+    const num=Number(index),id=Number.isFinite(num)?((Math.trunc(num)%roster.length)+roster.length)%roster.length:0;
+    const tires=selection(setup?.tires,0),suspension=selection(setup?.suspension,1);
+    const high=!!highDetail,key=id+':'+high;
+    if(!caches.has(key))caches.set(key,{paint:buildBody(id,high),chassis:chassis(id<4?id:[0,1,3][id-4],high)});
+    return assemble(id,id,roster[id].name,caches.get(key),high,tires,suspension);
   }
   const movingShock=new T.Vector3(),movingArm=new T.Vector3(),movingBase=new T.Vector3(),axleDirection=new T.Vector3();
   function pose(model,steerRadians,wheelAngle,compression=0,wheelOffsets){
@@ -1320,7 +1498,7 @@ const MTMTrucks = (() => {
       }
     }
   }
-  return {roster,tireSets,suspensionSets,make,pose};
+  return {roster,tireSets,suspensionSets,make,pose,makeCaddy};
 })();
 
 export {MTMTrucks};
