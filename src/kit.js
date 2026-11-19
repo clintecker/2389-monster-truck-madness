@@ -41,13 +41,6 @@ const MTMKit = (() => {
     return tex;
   }
 
-  /* Memoizing helper for geometry and color objects. key picks the entry,
-     make builds it once. Callers keep their own Map when a key is awkward. */
-  function memo(store, key, make) {
-    if (!store.has(key)) store.set(key, make());
-    return store.get(key);
-  }
-
   /* 2D paint primitives shared by the artwork painters. All of them begin
      their own path so callers can chain several shapes on one context. */
   function poly(c, pts, ink) {
@@ -67,5 +60,5 @@ const MTMKit = (() => {
     c.stroke();
   }
 
-  return { TAU, clamp, mix, cycle, rng, canvas, map, memo, paint: { poly, rect, oval, stroke } };
+  return { TAU, clamp, mix, cycle, rng, canvas, map, paint: { poly, rect, oval, stroke } };
 })();
