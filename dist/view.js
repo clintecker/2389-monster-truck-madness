@@ -192,7 +192,7 @@ const MTMView = (() => {
     // The Fifth Floor races indoors; the midway, carnival and fan stands
     // belong to the open-air venues and stay outside its walls.
     if(course.id==='office'){
-      const fair={entries:[],carnival:{fixed:[]},crowd:{fixed:[],sections:[]},electric:{},lookouts:[],
+      const fair={entries:[],carnival:{pieces:[],strands:[],venues:[],air:[],fixed:[],pal:['#8ff5e2','#ff7fae','#ffd863','#8cecf1']},crowd:{fixed:[],sections:[]},electric:{strings:[],spills:[]},lookouts:[],
         obstacles:data.obstacles||[],jokes:[],survey:null,classic:null,attraction:null};
       course.midway=fair.entries;course.carnival=fair.carnival;course.crowd=fair.crowd;
       course.obstacles=fair.obstacles;course.jokeSigns=fair.jokes;course.lookouts=fair.lookouts;
