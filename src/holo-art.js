@@ -3,7 +3,7 @@
    supplies their shared texture and silhouette even on file:// with no GPU. */
 const MTMHoloArt=(()=>{
   const T=THREE,tau=Math.PI*2,groups=new Map(),white='#ecfff7';
-  const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+  const {clamp} = MTMKit;
   const soft=(a,b,x)=>{const v=clamp((x-a)/(b-a));return v*v*(3-2*v);};
   function readCutout(encoded){
     const data=Uint8Array.from(atob(encoded),ch=>ch.charCodeAt(0));
@@ -41,7 +41,7 @@ const MTMHoloArt=(()=>{
     return {width,height,indexed,clearInk,palette};
   }
   function surface(width,height){
-    const c=document.createElement('canvas');c.width=width;c.height=height;return c;
+    return MTMKit.canvas(width,height);
   }
   function texture(canvas){
     const out=new T.CanvasTexture(canvas);out.colorSpace=T.SRGBColorSpace;out.anisotropy=4;return out;

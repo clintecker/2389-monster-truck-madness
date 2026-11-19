@@ -18,7 +18,7 @@ for track in ['arizona','eight','indiana','packet-pass','dead-letter','context-w
 three = (root / 'three.min.js').read_text()
 # The bundled UMD build is intentionally inline to support file:// with no module loader.
 three = 'void ' + three[three.index('/**'):] if three.startswith('console.warn(') and '/**' in three[:600] else three
-modules = ['trucks','scenery','audio','fitment-sprites','course','celestial','finish','track','world','contact','physics','motion','props','soilart','oddities','midway-mesa','midway-loop','midway-strip','sponsor-art','neon-art','lcd-art','holo-art','project-fair','midway','salvage-art','parade-art','carnival','electric','crowd','software','view','app']
+modules = ['kit','trucks','scenery','audio','fitment-sprites','course','celestial','finish','track','world','contact','physics','motion','props','soilart','oddities','midway-mesa','midway-loop','midway-strip','sponsor-art','neon-art','lcd-art','holo-art','project-fair','midway','salvage-art','parade-art','carnival','electric','crowd','software','view','app']
 code = '\n'.join((root / (name+'.js')).read_text() for name in modules)
 code = code.replace('/*__WASM__*/',b64encode((root / 'raster.wasm').read_bytes()).decode())
 notices = '\n\n'.join((root / name).read_text() for name in ['THREE-LICENSE.txt','OFL-Barlow.txt','OFL-BarlowCondensed.txt','OFL-Plex.txt','OFL-Outfit.txt','SKY-CREDITS.txt'])

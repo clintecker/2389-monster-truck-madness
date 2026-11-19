@@ -1,4 +1,4 @@
-const fs=require('fs'),vm=require('vm'),assert=require('assert');global.THREE=require('../src/three.min.js');for(const name of ['course','world','contact','physics'])vm.runInThisContext(fs.readFileSync(__dirname+'/../src/'+name+'.js','utf8'));
+const fs=require('fs'),vm=require('vm'),assert=require('assert');global.THREE=require('../src/three.min.js');for(const name of ['kit','course','world','contact','physics'])vm.runInThisContext(fs.readFileSync(__dirname+'/../src/'+name+'.js','utf8'));
 const manual=process.argv.includes('--manual');const set={difficulty:0,tires:0,suspension:1,gearing:1,transmission:manual?1:0};
 const endurance=process.argv.includes('--endurance');
 const layouts=endurance?[MTMCourses.forDistance(0,12),MTMCourses.forDistance(1,12)]:MTMCourses;

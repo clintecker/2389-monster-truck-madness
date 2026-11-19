@@ -1,7 +1,8 @@
 /* Every heat owns its loose objects and its dirt heightfields. The course layout
    stays immutable, so restarting or watching a replay cannot dirty the next heat. */
 const MTMWorld = (() => {
-  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),cols=21,rows=31;
+  const {clamp} = MTMKit;
+  const cols=21,rows=31;
   const kinds={
     barrels:{r:.64,h:1.62,inv:13,tough:18,material:'metal'},
     tires:{r:.88,h:1.26,inv:5,tough:25,material:'rubber'},

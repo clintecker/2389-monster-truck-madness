@@ -35,19 +35,8 @@ const MTMLoopMidway = (() => {
 
   // Canvas drawings use the same world dimensions, forward view and animation
   // phase as their mesh counterparts. Positive Y is up in this coordinate system.
-  function poly(g,points,ink) {
-    g.fillStyle=ink;g.beginPath();g.moveTo(...points[0]);
-    for(let i=1;i<points.length;i++)g.lineTo(...points[i]);
-    g.closePath();g.fill();
-  }
-  function rect(g,x,y,w,h,ink) {g.fillStyle=ink;g.fillRect(x,y,w,h);}
-  function disk(g,x,y,rx,ry,ink) {
-    g.fillStyle=ink;g.beginPath();g.ellipse(x,y,rx,ry,0,0,tau);g.fill();
-  }
-  function stroke(g,pts,ink,width) {
-    g.strokeStyle=ink;g.lineWidth=width;g.lineCap='round';g.lineJoin='round';g.beginPath();g.moveTo(...pts[0]);
-    for(let i=1;i<pts.length;i++)g.lineTo(...pts[i]);g.stroke();
-  }
+  const {paint} = MTMKit, poly = paint.poly, rect = paint.rect, stroke = paint.stroke;
+  const disk = (g,x,y,rx,ry,ink) => paint.oval(g,x,y,rx,ry,ink);
   const pipeHeights=[7.5,9.0,11.25,13.6,12.6,10.25,8.75,7.3];
   const keyXs=[-3.82,-2.82,-1.82,-.82,.18,1.18,2.18,3.18];
   const keyPress=(t,index,pulse)=>.10+.37*Math.max(0,Math.cos(t*3.1-index*1.29))**3+.34*pulse;

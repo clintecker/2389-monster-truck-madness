@@ -3,7 +3,7 @@
 (() => {
   'use strict';
 
-  const clamp = (x, low, high) => Math.max(low, Math.min(high, x));
+  const {clamp} = MTMKit;
   const bases = [950, 2700, 5600];
   // The lab identification signal uses semitone offsets 2, 3, 8 and 9 over D4.
   const ident = [2, 3, 8, 9].map(semitones => 293.6648 * 2 ** (semitones / 12));

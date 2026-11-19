@@ -7,7 +7,7 @@ const MTMProjectFair=(()=>{
   const tags=new Map();
   function placard(title,sub,accent,theme){
     const key=[title,sub,accent,theme].join('|');if(tags.has(key))return tags.get(key);
-    const c=document.createElement('canvas');c.width=768;c.height=sub?184:110;
+    const c=MTMKit.canvas(768,sub?184:110);
     const g=c.getContext('2d'),h=c.height;
     g.fillStyle=theme||ink;g.fillRect(0,0,c.width,h);
     g.fillStyle=accent;g.fillRect(0,0,11,h);g.fillRect(0,0,c.width,5);g.fillRect(0,h-5,c.width,5);

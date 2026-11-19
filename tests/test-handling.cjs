@@ -1,7 +1,7 @@
 /* Regression checks for the reported garage, wheel contact and transmission issues. */
 const fs=require('fs'),vm=require('vm'),assert=require('node:assert/strict');
 global.THREE=require('../src/three.min.js');
-for(const name of ['course','world','contact','physics'])vm.runInThisContext(fs.readFileSync(__dirname+'/../src/'+name+'.js','utf8'));
+for(const name of ['kit','course','world','contact','physics'])vm.runInThisContext(fs.readFileSync(__dirname+'/../src/'+name+'.js','utf8'));
 const P=MTMPhysics,make=(id=2,transmission=1)=>P.create(MTMCourses[id],0,{difficulty:0,tires:0,suspension:1,gearing:1,transmission});
 const dt=1/60,gas={steer:0,throttle:1,brake:0,handbrake:false},off={...gas,throttle:0};
 const advance=(g,seconds,input=gas)=>{for(let i=0;i<Math.round(seconds/dt);i++)P.drive(g,input,dt);};

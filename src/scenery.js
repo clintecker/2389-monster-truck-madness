@@ -3,26 +3,15 @@
 window.MTMScenery = (() => {
   'use strict';
 
-  const TAU = 2 * Math.PI;
-  const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-  const mix = (a, b, t) => a + (b - a) * t;
+  const {TAU, clamp, mix} = MTMKit;
   // Outbound Mesa and the longer route share the same painted sign sheets.
   const noticeTextures = new Map();
-
-  // A repeatable seed keeps landmarks in place between restarts.
-  function makeRandom(seed) {
-    let state = seed >>> 0;
-    return () => {
-      state = (Math.imul(1664525, state) + 1013904223) >>> 0;
-      return state / 4294967296;
-    };
-  }
 
   function build(world, terrain, course) {
     const T = THREE;
     const samples = course.samples;
     if (!samples || samples.length < 2) return;
-    const random = makeRandom({arizona: 0x41425a31, eight: 0x46494738, indiana: 0x494e4439}[course.id] || 1996);
+    const random = MTMKit.rng({arizona: 0x41425a31, eight: 0x46494738, indiana: 0x494e4439}[course.id] || 1996);
     const range = (lo, hi) => mix(lo, hi, random());
     const pick = list => list[Math.min(list.length - 1, Math.floor(random() * list.length))];
     const cachedColors = new Map();

@@ -24,7 +24,7 @@ const MTMMidway=(()=>{
   };
   function poster(design){
     if(!posters.has(design.id)){
-      const canvas=document.createElement('canvas');canvas.width=640;canvas.height=256;
+      const canvas=MTMKit.canvas(640,256);
       design.draw(canvas.getContext('2d'),640,256);posters.set(design.id,canvas);
     }
     return posters.get(design.id);

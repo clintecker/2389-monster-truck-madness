@@ -35,7 +35,7 @@ const MTMCelestial=(()=>{
   const sceneAssets=new Map(),colorChips=[],starWash=[];
   const decode=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
   let rawStars=null,clouds=null,dust=null,starTexture=null;
-  const canvas=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
+  const {canvas} = MTMKit;
   const texture=c=>{const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;return t;};
   function moon(id){
     const q=siteData[id],v=q.moon,c=regions[id];

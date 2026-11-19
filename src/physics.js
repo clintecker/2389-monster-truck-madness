@@ -1,7 +1,7 @@
 /* Fixed-step four-wheel arcade handling. Ground contact and race timing remain
    independent of rendering, camera choice, frame rate, and input device. */
 const MTMPhysics = (() => {
-  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),lerp=(a,b,t)=>a+(b-a)*t;
+  const {clamp, mix: lerp} = MTMKit;
   const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
   function contact(c,x,z,yaw){
     const sn=Math.sin(yaw),cs=Math.cos(yaw),fz=cs*1.65,fx=sn*1.65,sx=cs*1.33,sz=-sn*1.33;

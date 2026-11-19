@@ -4,7 +4,7 @@ const fs=require('node:fs'),vm=require('vm'),assert=require('node:assert/strict'
 global.window=global;global.THREE=require('../src/three.min.js');global.matchMedia=()=>({matches:false});global.innerWidth=960;global.innerHeight=630;global.devicePixelRatio=1;
 let frame;const host={clientWidth:960,clientHeight:630,appendChild(c){frame=c;}};
 global.document={createElement(){const c=cn.createCanvas(8,8),context=c.getContext.bind(c);c.getContext=(name,...args)=>name==='2d'?context(name,...args):null;return c;},getElementById(){return host;}};
-for(const name of ['course','celestial','finish','track','scenery','trucks','world','contact','physics','props','soilart','oddities','midway-mesa','midway-loop','midway-strip','sponsor-art','neon-art','lcd-art','holo-art','project-fair','midway','salvage-art','parade-art','carnival','electric','crowd','software','view']){
+for(const name of ['kit','course','celestial','finish','track','scenery','trucks','world','contact','physics','props','soilart','oddities','midway-mesa','midway-loop','midway-strip','sponsor-art','neon-art','lcd-art','holo-art','project-fair','midway','salvage-art','parade-art','carnival','electric','crowd','software','view']){
  const code=fs.readFileSync(__dirname+'/../src/'+name+'.js','utf8').replace('/*__WASM__*/',fs.readFileSync(__dirname+'/../src/raster.wasm').toString('base64'));
  vm.runInThisContext(code,{filename:name});
 }

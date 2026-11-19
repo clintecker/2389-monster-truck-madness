@@ -316,9 +316,7 @@ const MTMLcdArt=(()=>{
 
   // Each compact film sheet fits the software renderer's 1,024-pixel texture
   // limit. Two pixels of extrusion around each cel keep adjacent cuts separate.
-  function createCanvas(w,h){
-    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;return canvas;
-  }
+  function createCanvas(w,h){return MTMKit.canvas(w,h);}
   function cell(n){return {x:(n%columns)*cellW+pad,y:Math.floor(n/columns)*cellH+pad};}
   function imageFor(s){
     if(imageCache.has(s.id))return imageCache.get(s.id);

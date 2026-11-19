@@ -3,7 +3,7 @@
 const MTMCrowd=(()=>{
   'use strict';
   const T=THREE,tau=Math.PI*2,frames=12,beat=7.8,release=7;
-  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),cycle=(x,n)=>((x%n)+n)%n;
+  const {clamp, cycle} = MTMKit;
   const ink='#1d2336',bone='#f1eee0',mint='#8df9d5',pink='#ff68a8',sun='#ffd06f';
   const prizes=[pink,mint,sun,'#f4f3ec','#59c9ff','#b69dff'];
   const glassProfile=[[0,.071],[.025,.087],[.215,.087],[.272,.044],[.365,.036],[.372,.048],[.40,.046]];
@@ -287,7 +287,7 @@ const MTMCrowd=(()=>{
   }
   function atlas(seated){
     const idx=+seated;if(sheets[idx])return sheets[idx];
-    const canvas=document.createElement('canvas');canvas.width=frames*cellW;canvas.height=wardrobe.length*cellH;
+    const canvas=MTMKit.canvas(frames*cellW,wardrobe.length*cellH);
     const ctx=canvas.getContext('2d'),turn=.105,cs=Math.cos(turn),sn=Math.sin(turn);
     for(let style=0;style<wardrobe.length;style++)for(let k=0;k<frames;k++){
       const model=avatar(style,k,seated);geometry(model);
@@ -563,7 +563,7 @@ const MTMCrowd=(()=>{
         const ul=proj(...basis(s,-span,.775,.755)),ur=proj(...basis(s,span,.775,.755)),ll=proj(...basis(s,-span,.20,.755));
         if(ul&&ur&&ll){
           if(!s.banner){
-            const badge=document.createElement('canvas');badge.width=400;badge.height=70;const b=badge.getContext('2d');
+            const badge=MTMKit.canvas(400,70);const b=badge.getContext('2d');
             b.fillStyle=ink;b.fillRect(0,0,400,70);b.fillStyle=s.ink;b.fillRect(0,0,400,4);b.fillRect(0,66,400,4);
             b.textAlign='center';b.fillStyle=bone;b.font='bold italic 31px Georgia,serif';b.fillText(s.name.toUpperCase(),200,37,385);
             b.fillStyle=s.ink;b.font='bold 13px sans-serif';b.fillText(s.crew.toUpperCase()+'  /  SUPPORTERS CLUB',200,57);s.banner=badge;

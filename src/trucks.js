@@ -213,7 +213,7 @@
   }
   function skin(id){
     if(skins.has(id))return skins.get(id);
-    const can=document.createElement('canvas');can.width=can.height=1024;
+    const can=MTMKit.canvas(1024,1024);
     const c=can.getContext('2d');c.scale(.5,.5);
     panelDraw(c,panels.right,1180,460,d=>drawSide(d,id,1));panelDraw(c,panels.left,1180,460,d=>drawSide(d,id,-1));
     panelDraw(c,panels.front,670,240,d=>drawFace(d,id,true));panelDraw(c,panels.rear,670,240,d=>drawFace(d,id,false));
@@ -312,7 +312,7 @@
 
   function makeTireMaterial(index){
     if(tireMaterials[index])return tireMaterials[index];
-    const can=document.createElement('canvas');can.width=can.height=512;const c=can.getContext('2d');
+    const can=MTMKit.canvas(512,512);const c=can.getContext('2d');
     // The white corner is the neutral texel used by the three-dimensional lugs.
     c.fillStyle='#fff';c.fillRect(0,0,512,512);c.translate(256,256);
     const shade=c.createRadialGradient(-20,-7,103,0,0,220);
@@ -523,7 +523,7 @@
     // Wrap the artwork around the actual flanks. Reverse the UV direction on
     // the passenger side so numbers and sponsor lettering read from either side.
     for(const side of [-1,1]){
-      const cv=document.createElement('canvas');cv.width=1024;cv.height=192;
+      const cv=MTMKit.canvas(1024,192);
       const c=cv.getContext('2d'),shade=c.createLinearGradient(0,0,0,192);
       shade.addColorStop(0,d.highlight);shade.addColorStop(.3,d.paint);shade.addColorStop(1,d.ink);
       c.fillStyle=shade;c.fillRect(0,0,1024,192);
@@ -621,7 +621,7 @@
     }
     for(const s of [-1,1]){rod(steel,[s*.96,1.49,-2.69],[s*.96,1.49,2.56],.065,silver);box(steel,s*.71,1.53,2.60,.43,.17,.21,black);}
     // Small backlit sponsor plates can be read from the chase camera.
-    const cv=document.createElement('canvas');cv.width=512;cv.height=112;const ctx=cv.getContext('2d');
+    const cv=MTMKit.canvas(512,112);const ctx=cv.getContext('2d');
     ctx.fillStyle=d.ink;ctx.fillRect(0,0,512,112);ctx.fillStyle=d.accent;ctx.fillRect(0,0,512,4);
     ctx.textAlign='center';ctx.font='bold 47px sans-serif';ctx.fillText(d.name.toUpperCase(),256,55,485);
     ctx.fillStyle='#f3f7e8';ctx.font='bold 24px monospace';ctx.fillText('2389 RESEARCH  /  '+d.number,256,94);
