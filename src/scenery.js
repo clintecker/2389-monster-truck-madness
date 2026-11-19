@@ -1498,27 +1498,32 @@ const MTMScenery = (() => {
     const {course, half, courseFrame, clear, ground, gates, messages, favorites, marketStart,
       returnStart, gradeStart, campaignStart, projectStart, jokeSigns, random, pick, range} = stage;
     const farmPlaced=[];
-    const target=Math.max(0,Math.floor(course.length/8.4));
+    const target=Math.max(0,Math.floor(course.length/3.8));
     const marketPool=[];
     for(let i=favorites.length;i<projectStart;i++)marketPool.push(i);
     if(!marketPool.length)return;
     // Project boards are twice as likely as the older copy, so the fleet reads.
     for(let i=campaignStart;i<projectStart;i++){marketPool.push(i);marketPool.push(i);}
-    const laterals=[6.5,9.2,12.5,16.5,21,27];
+    const laterals=[5.5,7.4,9.6,12.5,16,20,24];
     const step=course.length/(target+1);
     for(let n=0;n<target;n++){
-      const s=step*(n+.5)+range(-step*.22,step*.22);
+      const s=step*(n+.5)+range(-step*.14,step*.14);
       const side=(n%2?1:-1)*(random()<.24?-1:1);
-      const lateral=half+laterals[Math.floor(random()*laterals.length)];
-      const q=courseFrame(s/course.length,side*lateral);
-      // Corridor hygiene: keep out of the finish bowl, clear of reserved
-      // footprints, and spaced from the curated boards and each other.
-      if(typeof MTMFinish!=='undefined'&&MTMFinish.reserved(course,q.x,q.z,4))continue;
       const styleCell=marketPool[Math.floor(random()*marketPool.length)];
       const style=messages[styleCell][2],w=style==='hazard'?12.2:style==='motel'?12.5:10.6;
-      if(!clear(q.x,q.z,w*.44+.2))continue;
-      if(jokeSigns.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<(w+m.width)*.42**2))continue;
-      if(farmPlaced.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<((w+m.width)*.60)**2))continue;
+      // Corridor hygiene: retry down the lateral list when a candidate sits
+      // inside a reserved bubble (gates, the bowl, curated boards' view
+      // corridors) or crowds an already-placed board.
+      let q=null,ok=false;
+      for(const off of laterals){
+        q=courseFrame(s/course.length,side*(half+off));
+        if(!clear(q.x,q.z,w*.44+.2))continue;
+        if(typeof MTMFinish!=='undefined'&&MTMFinish.reserved(course,q.x,q.z,4))continue;
+        if(jokeSigns.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<((w+m.width)*.28)**2))continue;
+        if(farmPlaced.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<((w+m.width)*.38)**2))continue;
+        ok=true;break;
+      }
+      if(!ok)continue;
       // Terrain fit: raise the board so its footing clears the highest
       // corner of its footprint; every third board flies on a tower.
       const cs=Math.cos(q.yaw),sn=Math.sin(q.yaw);
@@ -1555,11 +1560,11 @@ const MTMScenery = (() => {
       for(let attempt=0;attempt<9&&!done;attempt++){
         const f=(n+random()*1.0)/order.length;
         const side=(n%2?1:-1);
-        const lateral=half+[8.5,12,16,22,28][Math.floor(random()*5)];
+        const lateral=half+[6.5,9,12,16,21][Math.floor(random()*5)];
         const q=courseFrame(f,side*lateral);
         if(!clear(q.x,q.z,w*.44+.2))continue;
-        if(jokeSigns.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<(w+m.width)*.42**2))continue;
-        if(placed.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<((w+m.width)*.9)**2))continue;
+        if(jokeSigns.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<((w+m.width)*.28)**2))continue;
+        if(placed.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<((w+m.width)*.55)**2))continue;
         const cs=Math.cos(q.yaw),sn=Math.sin(q.yaw);
         let crest=-Infinity;
         for(const du of [-w*.42,w*.42])for(const dv of [-.8,.8]){
