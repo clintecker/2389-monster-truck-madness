@@ -1417,7 +1417,9 @@ const MTMScenery = (() => {
               style==='motel'?2.65:style==='wall'?1.98:extra?2.75:2.8;
             const naturalBottom=market&&!integrated?(style==='stone'?1.38:style==='tank'?4.3:style==='marquee'?3.45:normalBottom):normalBottom;
             const levels=market?[naturalBottom,naturalBottom+3.6]:[naturalBottom];
-            if(market&&stadium&&naturalBottom<10)levels.push(naturalBottom+7.2);
+            // Towers: every market board also tries a tall mount; the
+            // readability score decides whether the elevated copy wins.
+            if(market&&!integrated)levels.push(naturalBottom+8.2);
             if(grade&&stadium)levels.push(naturalBottom+10.2);
             for(const bottom of levels){
               const score=extra?Math.min(approachCoverage(stage, placed,w,s,34),approachCoverage(stage, placed,w,s,45),
