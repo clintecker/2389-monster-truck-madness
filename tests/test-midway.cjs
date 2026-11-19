@@ -39,6 +39,16 @@ for(const [layout,rides,ads,signs] of [[MTMCourses[0],9,9,62],[MTMCourses.forDis
  const g=MTMPhysics.create(layout,0,{difficulty:0,tires:1,suspension:1,gearing:1});MTMView.raceStart(g);
  const entries=g.c.midway,stops=MTMMidway.catalog(g.c,entries,g.c.jokeSigns);
  assert.equal(entries.filter(e=>e.kind==='attraction').length,rides);assert.equal(entries.filter(e=>e.kind==='sponsor').length,ads);assert.equal(entries.filter(e=>e.kind==='classic').length,1);assert.equal(g.c.jokeSigns.length,signs);
+ // No roadside sign may sit inside a mesa's true base envelope (level-0 ring
+ // reaches 1.46× the nominal radius plus sway, so 1.58 is the safe apron).
+ const mesas=g.c.mesas||[];
+ for(const s of g.c.jokeSigns)for(const m of mesas){
+   const reach=Math.max(m.rx,m.rz)*1.56,cs=Math.cos(s.yaw),sn=Math.sin(s.yaw);
+   for(let i=-2;i<=2;i++){
+     const px=s.x+cs*(i*s.width/4),pz=s.z-sn*(i*s.width/4);
+     assert(Math.hypot(px-m.x,pz-m.z)>=reach,'sign '+s.style+'@'+s.courseFraction.toFixed(2)+' intersects mesa at '+m.x.toFixed(0)+','+m.z.toFixed(0));
+   }
+ }
  const fair=g.c.carnival;
  console.log(layout.layoutKey,'salvage',fair.pieces.length,'models',new Set(fair.pieces.map(p=>p.kit.id)).size,'pennants',fair.strands.length*8,'flyovers',fair.air.length,'markets',fair.venues.length,'breakables',g.props.length);
  assert(fair.pieces.length>100);assert(fair.strands.length>0);assert.equal(fair.air.length,layout.layoutKey==='arizona-circuit'?6:3);assert.equal(fair.venues.length,layout.layoutKey==='arizona-circuit'?6:4);

@@ -1447,6 +1447,9 @@ const MTMScenery = (() => {
   // ---- desert, forest and roadside landmarks -----------------------------
   function mesa(stage, x,z,rx,rz,height,mode,distant=false) {
     const {ground, color, tri, quad, obstacles, range} = stage;
+    // Landmark records let tests audit sign clearance against the true rock
+    // envelope; distant skyline mesas never interact with roadside fixtures.
+    if(!distant)(stage.mesas||(stage.mesas=[])).push({x,z,rx,rz,height,mode});
     const sides=mode==='needle'?8:Math.floor(range(11,18));
     const p=frame(x,ground(x,z)-1.6,z,range(0,TAU));
     const angles=[],radii=[];
@@ -1945,7 +1948,7 @@ const MTMScenery = (() => {
     }
     // The return road sweeps close to the broadest bases; their weathered
     // outer rings reach as far as 1.51 times the nominal rock radius.
-    const mesaApron=course.layoutKey==='arizona-circuit'?1.58:1.33;
+    const mesaApron=1.58;
     for(let i=0;i<22;i++) {
       const f=clamp((i+.22+range(-.12,.12))/22,.012,.985);
       const side=i%2?1:-1;
@@ -1959,7 +1962,7 @@ const MTMScenery = (() => {
       }
       if(!clear(p.x,p.z,Math.max(rx,rz)*(mesaApron-.03))) continue;
       mesa(stage, p.x,p.z,rx,rz,h,slim?'needle':'plateau');
-      reserve(p,Math.max(rx,rz)*1.10);
+      reserve(p,Math.max(rx,rz)*1.58);
       if(!slim && i%2===0){
         const token=relative(p,side*rx*1.62,0,rz*.37);
         if(clear(token.x,token.z,13)){mesa(stage, token.x,token.z,8,10,h*.78,'needle');reserve(token,12);}
@@ -2347,6 +2350,7 @@ const MTMScenery = (() => {
   // geometry through glowing fixtures to the printed sign atlases.
   function assembleScene(stage) {
     const {T,world,solids,lamps,glow,shade,print,bulletinPages}=stage;
+    world.userData.mesas=stage.mesas;
     const group=new T.Group();group.name='Trackside scenery';
     const matte=new T.MeshLambertMaterial({vertexColors:true,side:T.DoubleSide});
     for(const batch of solids.values()) {
@@ -2396,6 +2400,8 @@ const MTMScenery = (() => {
     const samples = course.samples;
     if (!samples || samples.length < 2) return;
     const stage = createStage(world, terrain, course);
+    stage.mesas = [];
+    course.mesas = stage.mesas;
     if (course.id === 'arizona') desert(stage);
     else if (course.id === 'eight') forest(stage);
     else speedway(stage);

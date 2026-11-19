@@ -37,6 +37,7 @@ const MTMAudio = (() => {
   let duckUntil = 0;
   let spoken = null;
   let audience = null;
+  let droneFleet = null;
   let audienceArmed = false;
   let marshalUntil = 0;
   let rngState = 0x44a10d29;
@@ -270,6 +271,7 @@ const MTMAudio = (() => {
     stopCrowd();
     stopSpeech();
     silenceShots();
+    if (droneFleet) target(droneFleet.out.gain,0,audio.ctx.currentTime,.3);
     duckUntil = 0;
     marshalUntil = 0;
     idleEngine();
@@ -767,6 +769,45 @@ const MTMAudio = (() => {
 
   // Separate the mortar cough, initial pressure impulse, reflected boom and
   // late glitter. Distance dulls high frequencies and reduces direct energy.
+  // The drone salute flies a persistent fleet: a broad propeller buzz with
+  // slow blade-pass modulation, an airy shimmer an octave up, and a soft
+  // position-dependent stereo image. The bus lives for the whole session;
+  // the gain follows the fleet's presence and distance each frame.
+  function buildDroneBus() {
+    const ctx = audio.ctx;
+    const out = ctx.createGain();out.gain.value = 0;out.connect(sfx);
+    const buzz = ctx.createOscillator();buzz.type = 'sawtooth';buzz.frequency.value = 86;
+    const buzzShape = ctx.createBiquadFilter();buzzShape.type = 'lowpass';buzzShape.frequency.value = 320;buzzShape.Q.value = .8;
+    const blades = ctx.createGain();blades.gain.value = .55;
+    const bladeAM = ctx.createOscillator();bladeAM.type = 'sine';bladeAM.frequency.value = 31;
+    const bladeDepth = ctx.createGain();bladeDepth.gain.value = .34;
+    bladeAM.connect(bladeDepth).connect(blades.gain);
+    const shimmer = ctx.createOscillator();shimmer.type = 'triangle';shimmer.frequency.value = 231;
+    const shimmerShape = ctx.createBiquadFilter();shimmerShape.type = 'bandpass';shimmerShape.frequency.value = 1150;shimmerShape.Q.value = 2.4;
+    const shimmerGain = ctx.createGain();shimmerGain.gain.value = .05;
+    const wander = ctx.createOscillator();wander.type = 'sine';wander.frequency.value = .21;
+    const wanderDepth = ctx.createGain();wanderDepth.gain.value = 34;
+    wander.connect(wanderDepth).connect(buzz.frequency);
+    const pan = ctx.createStereoPanner();
+    buzz.connect(buzzShape).connect(blades).connect(out);
+    shimmer.connect(shimmerShape).connect(shimmerGain).connect(out);
+    out.connect(pan).connect(master);
+    buzz.start();shimmer.start();bladeAM.start();wander.start();
+    return {out,pan,buzz,shimmer,wander};
+  }
+  function drones(level,pan = 0) {
+    if(!audio || muted || document.hidden || !Number.isFinite(level))return;
+    level = clamp(Number(level) || 0,0,1);pan = clamp(Number(pan) || 0,-1,1);
+    if(level < .012) {
+      if(droneFleet && droneFleet.out.gain.value > .001)target(droneFleet.out.gain,0,audio.ctx.currentTime,.5);
+      return;
+    }
+    if(!droneFleet)droneFleet = buildDroneBus();
+    const now = audio.ctx.currentTime;
+    target(droneFleet.out.gain,Math.round(level*.30*220)/220,now,.19);
+    target(droneFleet.pan.pan,Math.round(pan*60)/100,now,.28);
+  }
+
   function fireworksSound(cue){
     if(!cue)return;
     const {kind,delay,seed,distance,venue}=cue,tag=Math.round(seed*93);
@@ -977,7 +1018,7 @@ const MTMAudio = (() => {
   // An unfocused or backgrounded window should release the audio device.
   window.addEventListener('pagehide', stop);
   document.addEventListener('visibilitychange', () => { if (document.hidden) stop(); });
-  return {unlock, setMuted, update, effect, call, crowd, stop};
+  return {unlock, setMuted, update, effect, call, crowd, drones, stop};
 })();
 
 export {MTMAudio};

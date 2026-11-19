@@ -437,7 +437,7 @@ import { MTMFitmentArt } from './fitment-sprites.js';
     $('startFill').style.transform='scaleX('+g.p.wheelspin.toFixed(3)+')';
   }
   let lastHUD=0;
-  function loop(now){raf=requestAnimationFrame(loop);const raw=last?Math.max(0,(now-last)/1000):0,dt=Math.min(raw,.55);last=now;if(document.hidden)return;const pad=getPad();padActions(pad);if(dialog==='garage'){V.garageFrame(dt);return;}if(state==='tour'){g.tourTime+=dt;if(g.tourStop?.kind==='finish')MTMFinish.soundCues(g.c,g.tourTime-dt,g.tourTime,null,cue=>A.effect('firework',cue));V.tour(g,g.tourStop,g.tourTime);listenToFans(g.tourTime);return;}if(!g||['home','paused','loading','results'].includes(state))return;
+  function loop(now){raf=requestAnimationFrame(loop);const raw=last?Math.max(0,(now-last)/1000):0,dt=Math.min(raw,.55);last=now;if(document.hidden)return;const pad=getPad();padActions(pad);if(dialog==='garage'){V.garageFrame(dt);return;}if(state==='tour'){g.tourTime+=dt;if(g.tourStop?.kind==='finish'){MTMFinish.soundCues(g.c,g.tourTime-dt,g.tourTime,null,cue=>A.effect('firework',cue));droneSound(g.tourTime,null);}V.tour(g,g.tourStop,g.tourTime);listenToFans(g.tourTime);return;}if(!g||['home','paused','loading','results'].includes(state))return;
     if(now>messageUntil)$('raceMessage').classList.remove('on');
     if(state==='replay'){replay(dt);return;}
     const inp=input(pad),step=MTMMotion.step;
@@ -470,6 +470,7 @@ import { MTMFitmentArt } from './fitment-sprites.js';
       const previousShow=g.paradeTime;fin-=dt;acc+=dt;
       while(acc>=step){motion.beforeStep();P.drive(g,inp,step);g.paradeTime+=step;acc-=step;}
       MTMFinish.soundCues(g.c,previousShow,g.paradeTime,g.p,cue=>A.effect('firework',cue));
+      droneSound(g.paradeTime,g.p);
       g.events.length=0;
       if(fin<23&&fin>22)countText('');
       if(fin<23&&fin>22.8)message(g.c.loop?'Bear right into the victory bowl':'Victory bowl ahead · brake for the turnaround',3);
