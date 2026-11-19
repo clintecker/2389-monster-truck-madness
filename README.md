@@ -12,7 +12,7 @@ The 2389 Research motor pool has seven monster trucks, one municipal lobster per
 
 Open the game, pick an event, then hit **Enter**. Hold the throttle as **2** lights up and keep it down through green. Hold the **right mouse button** and drag to look at whatever just went past your window. Release to face forward again.
 
-For offline play, use **Save offline** in the lobby or open the checked-in `dist/index.html` in your browser. The complete game travels in that one file, including the renderer, truck art, fonts, and sound synthesis.
+For offline play, copy the checked-in `dist/` directory and serve it from any static file server. The complete game travels with it: modules, renderer, truck art, fonts, and sound synthesis.
 
 ## What's on the bill
 
@@ -28,7 +28,7 @@ The finish stripe stops the clock. The truck keeps going. Drive into the Victory
 
 ## Under the hood
 
-The editable game lives in `src/`. Python assembles it into one HTML page. Three.js renders the scene, a bundled WebAssembly rasterizer covers machines without WebGL, and a Canvas fallback uses painted sprites. Race timing and vehicle physics run on a fixed step.
+The editable game lives in `src/` as ES modules. Python assembles them into the `dist/` directory. Three.js renders the scene, a bundled WebAssembly rasterizer covers machines without WebGL, and a Canvas fallback uses painted sprites. Race timing and vehicle physics run on a fixed step.
 
 ```sh
 python3 tools/build.py

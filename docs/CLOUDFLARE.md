@@ -2,7 +2,7 @@
 
 The game deploys to **Workers Static Assets**, using `wrangler.jsonc`. It needs no
 Worker script, database, R2 bucket, KV namespace, or application secrets. Only
-`dist/` is published. The single-file game and Save offline feature stay intact.
+`dist/` is published. The game ships as a directory of ES modules, fonts, artwork and the compiled rasterizer.
 
 ## Local bot: first deployment
 
@@ -70,16 +70,13 @@ requires control of that host; Cloudflare cannot configure that redirect for it.
 - Save settings, reload, and verify persistence. The key is
   `mtm96-offroad-racing-1`; localStorage is origin-specific. Existing records on the
   old hostname do not transfer automatically. No save migration is included.
-- Use Save offline and open the downloaded file with networking disabled.
 - Confirm the deployed build corresponds to the intended GitHub commit.
 
 For rollback, select the previous deployment in Cloudflare or use
 `npx wrangler rollback <VERSION_ID>`. Disable automatic deployment first if needed
 and revert the bad source commit before re-enabling it.
 
-The current HTML is about 8 MB; Workers allows 25 MiB per static asset. Keep the
-single-file build for now; splitting online assets is a separate optimization.
-Do not apply a strict CSP without testing inline scripts/styles, data URLs and WASM.
+The distribution is about 7 MB across roughly 60 files; Workers allows 25 MiB per static asset. Do not apply a strict CSP without testing inline styles and the WASM loader.
 
 References: [Static assets](https://developers.cloudflare.com/workers/static-assets/),
 [Wrangler](https://developers.cloudflare.com/workers/wrangler/),
