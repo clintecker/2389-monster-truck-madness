@@ -33,6 +33,14 @@ const MTMCourses = (() => {
       relief:[[-257,125,179,164,47],[-67,264,147,143,-18],[177,156,178,155,52],[310,-95,146,143,31],[42,-254,138,147,-19],[-121,-128,125,127,22]],
       jumps:[[.083,23,12,3.4,'earth'],[.198,24,12,3.3,'earth'],[.294,23,14,3.6,'earth'],[.382,23,12,3.1,'earth'],[.489,25,12,3.3,'rail'],[.579,21,12,2.9,'earth'],[.676,23,11,3.4,'earth'],[.773,20,12,2.6,'earth'],[.876,24,13,3.1,'earth']]}
   );
+  specs.push(
+    {id:'office',layoutKey:'fifth-floor',name:'The Fifth Floor',classic:'2389 Office GP',type:'Circuit',
+      place:'The 2389 office, ten times over',surface:'Commercial carpet',closed:true,width:30,laps:2,entrants:4,
+      checkpoints:[.24,.48,.72,1],
+      nodes:[[-86,-24],[-88,16],[-80,62],[-36,72],[16,70],[56,68],[74,44],[76,-2],[66,-40],[18,-76],[-42,-66],[-82,-52]],
+      relief:[],
+      jumps:[[.18,16,9,2.2,'earth'],[.45,18,10,2.6,'earth'],[.78,16,8,2.2,'earth']]}
+  );
   const {clamp} = MTMKit;
   const smooth=t=>t*t*(3-2*t);
   function make(spec) {
@@ -99,6 +107,7 @@ const MTMCourses = (() => {
       return stripProfile[stripProfile.length-1][1];
     }
     function base(x,z){
+      if(spec.id==='office')return 0;
       if(spec.id==='indiana')return stripHeight(z)*1.16;
       let h=spec.id==='eight'?2.8*Math.sin(z*.023)+1.8*Math.sin(x*.030+z*.011)+.55*Math.sin(x*.06-z*.02):
         4.2*Math.sin(z*.020+x*.008)+3.1*Math.sin(x*.022-z*.009)+1.05*Math.sin(x*.047+z*.026)+.43*Math.sin(z*.083-x*.027);
@@ -128,6 +137,7 @@ const MTMCourses = (() => {
     const gates=spec.checkpoints.map((f,i)=>({...at(f*length),s:f*length,index:i,finish:i===spec.checkpoints.length-1}));
     const bounds=samples.reduce((b,p)=>({minX:Math.min(b.minX,p.x),maxX:Math.max(b.maxX,p.x),minZ:Math.min(b.minZ,p.z),maxZ:Math.max(b.maxZ,p.z)}),{minX:Infinity,maxX:-Infinity,minZ:Infinity,maxZ:-Infinity});
     const surfaceAt=(x,z,near)=>{
+      if(spec.id==='office')return 'dirt';
       if(spec.id==='eight'&&near.distance>spec.width*.54)return 'grass';
       if(spec.id==='arizona'&&near.distance>spec.width*.54)return 'sand';
       if(spec.id==='arizona'&&near.s>length*.421&&near.s<length*.448&&near.distance<spec.width*.7)return 'mud';
@@ -137,6 +147,7 @@ const MTMCourses = (() => {
     // both front axles on one line. Rally trucks occupy two staggered rows.
     const lane=Math.min(6.7,spec.width*.295);
     const gridSlots=spec.id==='indiana'?[[-.2,lane],[-.2,-lane]]:
+      spec.id==='office'?[[-19.4,lane],[-12.2,-lane],[-3.8,lane],[3.4,-lane]]:
       [[-19.4,lane],[-2.8,-lane],[-5.3,lane],[-16.9,-lane]];
     const gridInk=[];
     for(const [s,side] of gridSlots){

@@ -162,6 +162,9 @@ const MTMCelestial=(()=>{
     return list;
   }
   function assets(id){
+    // The Fifth Floor races under a permanent ceiling; it borrows the
+    // fairgrounds sky for its window view and lunar light.
+    if(id==='office')id='indiana';
     if(!sceneAssets.has(id)){
       const bg=atmosphere(id),{disk,halo}=lunarImage(id,bg),list=stars(id),spec=regions[id],q=siteData[id];
       const dir=new T.Vector3(...q.moon),r=new T.Vector3().crossVectors(dir,new T.Vector3(0,1,0)).normalize(),u=new T.Vector3().crossVectors(r,dir);

@@ -21,7 +21,8 @@ const MTMWorld = (() => {
   const layouts={
     arizona:[[.031,'pylon',1],[.083,'barrels',-1],[.137,'barricade',1],[.215,'tires',-1],[.331,'barrels',1],[.384,'pylon',-1],[.447,'barricade',1],[.526,'tires',-1],[.654,'barrels',1],[.722,'pylon',1],[.807,'barricade',-1],[.919,'tires',1]],
     eight:[[.043,'pylon',-1],[.115,'barrels',-1],[.181,'barricade',1],[.23,'tires',-1],[.381,'barrels',1],[.435,'pylon',1],[.559,'tires',-1],[.622,'barricade',1],[.809,'barrels',1],[.904,'pylon',-1]],
-    indiana:[[.055,'pylon',1],[.118,'barrels',1],[.185,'tires',-1],[.363,'barricade',-1],[.431,'pylon',1],[.532,'tires',1],[.611,'barrels',-1],[.786,'barricade',1],[.855,'tires',-1],[.937,'pylon',1]]
+    indiana:[[.055,'pylon',1],[.118,'barrels',1],[.185,'tires',-1],[.363,'barricade',-1],[.431,'pylon',1],[.532,'tires',1],[.611,'barrels',-1],[.786,'barricade',1],[.855,'tires',-1],[.937,'pylon',1]],
+    office:[[.06,'pylon',1],[.14,'barrels',-1],[.30,'pylon',-1],[.40,'pylon',1],[.58,'barrels',1],[.66,'pylon',-1],[.84,'pylon',1]]
   };
   function props(c){
     const list=[];
@@ -53,7 +54,8 @@ const MTMWorld = (() => {
     return list;
   }
   const soilSites={arizona:[[.162,-1.8,12],[.433,0,19],[.665,1.9,14],[.824,-1.4,12]],
-    eight:[[.092,1.4,15],[.201,-1.6,13],[.421,1.3,17],[.843,-1.8,15]],indiana:[[.172,0,12],[.443,0,13],[.825,0,12]]};
+    eight:[[.092,1.4,15],[.201,-1.6,13],[.421,1.3,17],[.843,-1.8,15]],indiana:[[.172,0,12],[.443,0,13],[.825,0,12]],
+    office:[[.18,-1.5,11],[.5,1.5,13],[.82,-1.5,11]]};
   function sample(rough,gx,gz){
     const x=Math.min(cols-2,Math.floor(gx)),z=Math.min(rows-2,Math.floor(gz)),a=gx-x,b=gz-z,k=z*cols+x;
     return ((1-b)*((1-a)*rough[k]+a*rough[k+1])+b*((1-a)*rough[k+cols]+a*rough[k+cols+1]))/255;
