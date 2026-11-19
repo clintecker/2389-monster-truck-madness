@@ -11,7 +11,8 @@ const MTMTrack = (() => {
   const palettes={
     arizona:{road:[106,91,103],ground:[65,49,67],gravel:'#d3b0ba',fog:0x444058},
     eight:{road:[80,99,100],ground:[38,54,55],gravel:'#b3cec3',fog:0x334951},
-    indiana:{road:[94,88,112],ground:[47,45,62],gravel:'#c5bdde',fog:0x403a54}
+    indiana:{road:[94,88,112],ground:[47,45,62],gravel:'#c5bdde',fog:0x403a54},
+    office:{road:[150,146,138],ground:[112,108,100],gravel:'#cfc9bd',fog:0x8d8578}
   };
   const mint='#67ffe0',pink='#ff4899';
   const textureCache=new Map();
