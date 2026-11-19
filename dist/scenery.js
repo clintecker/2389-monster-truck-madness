@@ -242,44 +242,6 @@ const MTMScenery = (() => {
       [.946,-1,'stamp','boot','SPEED-RUN','TEST THE FINISH','speed-run','Race scrutineers','The finish line passes inspection only when something can actually finish.']
     ]
   };
-  // One board per public 2389 project, with its own silhouette style, icon
-  // and copy. Slugs match the product pages on 2389.ai/research/products.
-  const projectFleet=[
-    ['orrery','survey','moon','ORRERY','MAPS THAT LEARN'],
-    ['mermaidkit','terminal','wave','MERMAIDKIT','ALL 30 DIAGRAMS'],
-    ['review-squad','survey','wrench','REVIEW-SQUAD','FOUR LUGNUT DEEP'],
-    ['dippin','plate','loop','DIPPIN','PIPELINES BY HAND'],
-    ['simmer','spring','drop','SIMMER','HONE IT SLOW'],
-    ['dotpowers','slats','plumb','DOTPOWERS','BRAINSTORM TO TDD'],
-    ['dot-viewer','dialbox','level','DOT VIEWER','DOTS ON DISPLAY'],
-    ['tracker','ticket','clock','TRACKER','GATES THAT WAIT'],
-    ['summarize-meetings','stamp','receipt','MEETING NOTES','SUMMARIZED TWICE'],
-    ['smasher','blade','bolt','SMASHER','GRAPHS GO FAST'],
-    ['deliberation','shield','dial','DELIBERATION','UNITY BY FRIDAY'],
-    ['coven','wall','ghost','COVEN','AGENTS IN A CIRCLE'],
-    ['mux','terminal','rail','MUX','PATCH EVERYTHING'],
-    ['mammoth','tank','peak','MAMMOTH','BIG GRAPHS BIGGER'],
-    ['soloclaw','blade','claw','SOLOCLAW','ONE CLAW ONE KEY'],
-    ['ccvault','dialbox','chip','CCVAULT','YESTERDAY SEARCHABLE'],
-    ['gsuite-mcp','plate','receipt','GSUITE MCP','MAIL ON THE TWOS'],
-    ['worldview-synthesis','marquee','round','WORLDVIEW','TENSIONS NAMED'],
-    ['documentation-audit','plate','plumb','DOC AUDIT','CLAIMS VERIFIED'],
-    ['speed-run','flight','trophy','SPEED-RUN','SHIP AT GREEN'],
-    ['pulse','dialbox','loop','PULSE','A JOURNAL THAT FEDS'],
-    ['jeff','plate','bell','JEFF','YOUR INBOX AGENT'],
-    ['turtle','stone','frog','TURTLE','TMUX BY LEVELS'],
-    ['binary-re','survey','depth','BINARY RE','ELFS INTERROGATED'],
-    ['ish','plate','bridge','ISH','FAKES THAT PASS'],
-    ['test-kitchen','shop','griddle','TEST KITCHEN','FIVE WAYS COOKED'],
-    ['multi-agent-systems','wall','magnet','AGENT SYSTEMS','FAN OUT WISELY'],
-    ['scenario-testing','hazard','barricade','SCENARIO TESTS','NO MOCKS SURVIVE'],
-    ['fresh-eyes','pennant','sun','FRESH EYES','SHIP WITH PROOF'],
-    ['skills-marketplace','marquee','chip','SKILLS MARKET','PLUGINS THAT WORK'],
-    ['phonegang','plate','bell','PHONEGANG','SWIPES BY SCRIPT'],
-    ['translator','plate','wave','TRANSLATOR','TONGUES TURNED'],
-    ['botboard','terminal','center','BOTBOARD','HUMANS WELCOME'],
-    ['meme-rodeo','pennant','raccoon','MEME RODEO','TAGGED AND RIDDEN'],
-  ];
   // The outbound return notices, the western market and the grade commission
   // are mounted on every layout that reaches them.
   const returnNotices=[
@@ -785,9 +747,7 @@ const MTMScenery = (() => {
     const returnStart=marketStart+marketNotices.length,westStart=returnStart+returnNotices.length;
     const gradeStart=returnLayout?westStart+westMarket.length:returnStart,westGradeStart=gradeStart+gradeNotices.length;
     const campaignStart=westGradeStart+(returnLayout?westGrades.length:0);
-    const projectStart=campaignStart+campaigns.length;
-    const projects=projectFleet.map(([slug,style,icon,upper,lower])=>[0,1,style,icon,upper,lower,slug]);
-    const messages=favorites.concat(extraMessages,marketNotices,returnLayout?returnNotices:[],returnLayout?westMarket:[],gradeNotices,returnLayout?westGrades:[],campaigns,projects);
+    const messages=favorites.concat(extraMessages,marketNotices,returnLayout?returnNotices:[],returnLayout?westMarket:[],gradeNotices,returnLayout?westGrades:[],campaigns);
     const bulletinPages=[];
     for(let i=0;i<messages.length;i+=8){
       const key=messages.slice(i,i+8).map(m=>m.slice(2).join('|')).join('~');
@@ -798,7 +758,7 @@ const MTMScenery = (() => {
     const sprintLength=returnLayout&&typeof MTMCourses!=='undefined'?MTMCourses[0].length:course.length;
     const jokeSigns=world.userData.jokeSigns||(world.userData.jokeSigns=[]);
     return {messages,favorites,marketStart,returnStart,gradeStart,westStart,westGradeStart,
-      campaignStart,projectStart,returnLayout,sprintLength,bulletinPages,jokeSigns};
+      campaignStart,returnLayout,sprintLength,bulletinPages,jokeSigns};
   }
 
   // ---- occlusion survey --------------------------------------------------
@@ -1288,9 +1248,9 @@ const MTMScenery = (() => {
       }
     }
   }
-  function bulletinBoard(stage, p,w,h,bottom,style,cell,integrated,s,farm=false) {
+  function bulletinBoard(stage, p,w,h,bottom,style,cell,integrated,s) {
     const {emit, box, line, contact, beacon, course, solidCircle, messages, favorites, marketStart, returnStart, gradeStart,
-      westStart, westGradeStart, campaignStart, projectStart, bulletinPages, jokeSigns} = stage;
+      westStart, westGradeStart, campaignStart, bulletinPages, jokeSigns} = stage;
     const top=bottom+h,trim=signPaint(style,messages[cell][3]).trim,steel='#717e95';
     if(silhouettes[style]){
       cutSign(stage, p,w,h,bottom,style,cell,integrated);
@@ -1337,11 +1297,10 @@ const MTMScenery = (() => {
     }
     // The basic canvas view uses the same successful placement and exact copy.
     const center=vertex(p,0,bottom+h*.5,silhouettes[style] ? .22 : .197);
-    const series=cell>=projectStart?'project-fleet':cell>=campaignStart?'project-campaign':cell<favorites.length?'original':cell<marketStart?'extra':cell<returnStart?'night-market':cell<gradeStart?(cell<westStart?'mesa-return':'western-market'):cell<westGradeStart?'grade-commission':'western-grades';
-    if(farm)return;
+    const series=cell>=campaignStart?'project-campaign':cell<favorites.length?'original':cell<marketStart?'extra':cell<returnStart?'night-market':cell<gradeStart?(cell<westStart?'mesa-return':'western-market'):cell<westGradeStart?'grade-commission':'western-grades';
     const sheet=makeBulletinTexture(stage, cell>>3).image,sw=sheet.width/2,sh=sheet.height/4,slot=cell%8;
     jokeSigns.push({x:center[0],y:center[1],z:center[2],yaw:p.yaw,width:w,height:h,
-      lines:messages[cell].slice(4,6),campaign:cell>=campaignStart&&cell<projectStart?{audience:messages[cell][7],caption:messages[cell][8],url:"https://2389.ai/research/products/"+messages[cell][6]+"/"}:null,accent:trim,style,icon:messages[cell][3],series,courseFraction:s/course.length,
+      lines:messages[cell].slice(4,6),campaign:cell>=campaignStart?{audience:messages[cell][7],caption:messages[cell][8],url:"https://2389.ai/research/products/"+messages[cell][6]+"/"}:null,accent:trim,style,icon:messages[cell][3],series,courseFraction:s/course.length,
       outline:silhouettes[style]?.[0],
       sprite:{image:sheet,x:(slot%2)*sw,y:Math.floor(slot/2)*sh,w:sw,h:sh}});
     if(messages[cell][3]==='trophy'){
@@ -1410,7 +1369,7 @@ const MTMScenery = (() => {
   }
   function roadsideBulletins(stage) {
     const {course, half, bypass, courseFrame, nearestDistance, clear, reserve, messages, favorites, marketStart, returnStart,
-      gradeStart, westStart, westGradeStart, campaignStart, projectStart, returnLayout, sprintLength, jokeSigns, readingWindows} = stage;
+      gradeStart, westStart, westGradeStart, campaignStart, returnLayout, sprintLength, jokeSigns, readingWindows} = stage;
     gateObstructions(stage);
     const stadium=course.id==='indiana';
     const widths={hazard:12.2,terminal:13.2,motel:12.5,guide:12.3,pit:11.9,
@@ -1421,8 +1380,6 @@ const MTMScenery = (() => {
     const installOrder=messages.map((_,i)=>i).sort((a,b)=>priority(a)-priority(b)||a-b);
     function priority(i){return i>=gradeStart?2:i<marketStart||i>=returnStart&&i<westStart?0:1;}
     installOrder.forEach(i=>{
-      // The project fleet is sited by its own readability-survayed pass.
-      if(i>=projectStart)return;
       const [f,side,style]=messages[i],extra=i>=favorites.length,extended=i>=returnStart&&i<gradeStart||i>=westGradeStart&&i<campaignStart,grade=i>=gradeStart,market=priority(i)>0;
       const startNotice=i===favorites.length;
       const w=widths[style],h=w*(style==='shield'||style==='stone'||style==='tank'?.42:style==='slats'||style==='marquee'?.415:extra?.393:.365);
@@ -1487,93 +1444,6 @@ const MTMScenery = (() => {
     // Give the independent carnival and project-board planners the same
     // three approach distances used to verify the new printed collection.
     for(const window of readingWindows)window.eyes=window.marketEyes;
-  }
-
-  // The advertising farm: dense repeat coverage of the established market
-  // copy along every course. Boards reuse existing atlas cells (no new
-  // texture pages), sit with a cheap corridor sampler instead of the full
-  // readability survey, and stay pure scenery — they never join the tour
-  // catalog or the reading-window protection set.
-  function billboardFarm(stage) {
-    const {course, half, courseFrame, clear, ground, gates, messages, favorites, marketStart,
-      returnStart, gradeStart, campaignStart, projectStart, jokeSigns, random, pick, range} = stage;
-    const farmPlaced=[];
-    const target=Math.max(0,Math.floor(course.length/8.4));
-    const marketPool=[];
-    for(let i=favorites.length;i<projectStart;i++)marketPool.push(i);
-    if(!marketPool.length)return;
-    // Project boards are twice as likely as the older copy, so the fleet reads.
-    for(let i=campaignStart;i<projectStart;i++){marketPool.push(i);marketPool.push(i);}
-    const laterals=[6.5,9.2,12.5,16.5,21,27];
-    const step=course.length/(target+1);
-    for(let n=0;n<target;n++){
-      const s=step*(n+.5)+range(-step*.22,step*.22);
-      const side=(n%2?1:-1)*(random()<.24?-1:1);
-      const lateral=half+laterals[Math.floor(random()*laterals.length)];
-      const q=courseFrame(s/course.length,side*lateral);
-      // Corridor hygiene: keep out of the finish bowl, clear of reserved
-      // footprints, and spaced from the curated boards and each other.
-      if(typeof MTMFinish!=='undefined'&&MTMFinish.reserved(course,q.x,q.z,4))continue;
-      const styleCell=marketPool[Math.floor(random()*marketPool.length)];
-      const style=messages[styleCell][2],w=style==='hazard'?12.2:style==='motel'?12.5:10.6;
-      if(!clear(q.x,q.z,w*.44+.2))continue;
-      if(jokeSigns.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<(w+m.width)*.42**2))continue;
-      if(farmPlaced.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<((w+m.width)*.60)**2))continue;
-      // Terrain fit: raise the board so its footing clears the highest
-      // corner of its footprint; every third board flies on a tower.
-      const cs=Math.cos(q.yaw),sn=Math.sin(q.yaw);
-      let crest=-Infinity;
-      for(const du of [-w*.42,w*.42])for(const dv of [-.8,.8]){
-        const x=q.x+cs*du+sn*dv,z=q.z-sn*du+cs*dv;
-        crest=Math.max(crest,ground(x,z));
-      }
-      const base=q.y;
-      const bottom=Math.max(2.8,crest-base+2.6)+(n%3===0?8.2:0);
-      const h=w*(style==='slats'||style==='marquee'?.415:.365);
-      bulletinBoard(stage,q,w,h,bottom,style,styleCell,false,s/course.length,true);
-      farmPlaced.push({x:q.x,z:q.z,width:w});
-    }
-  }
-
-  // The project fleet: every public 2389 project gets two curated boards per
-  // course, sited with the full readability survey so the copy actually reads
-  // at race speed. These are catalog scenery, not tour stops.
-  function projectBillboards(stage) {
-    const {course, half, courseFrame, clear, ground, readingWindows, messages, projectStart, jokeSigns, random, range} = stage;
-    if(!projectStart)return;
-    const fleet=[];for(let i=projectStart;i<messages.length;i++)fleet.push(i);
-    if(!fleet.length)return;
-    const placed=[];
-    const order=fleet.concat(fleet);
-    for(let n=0;n<order.length;n++){
-      const cell=order[n],style=messages[cell][2];
-      const w=style==='hazard'?12.2:style==='motel'?12.5:10.6;
-      const h=w*(style==='slats'||style==='marquee'?.415:.365);
-      // March along the course, testing candidate sites; keep the first one
-      // that clears reservations, spacing and the readability bar.
-      let done=false;
-      for(let attempt=0;attempt<9&&!done;attempt++){
-        const f=(n+random()*1.0)/order.length;
-        const side=(n%2?1:-1);
-        const lateral=half+[8.5,12,16,22,28][Math.floor(random()*5)];
-        const q=courseFrame(f,side*lateral);
-        if(!clear(q.x,q.z,w*.44+.2))continue;
-        if(jokeSigns.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<(w+m.width)*.42**2))continue;
-        if(placed.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<((w+m.width)*.9)**2))continue;
-        const cs=Math.cos(q.yaw),sn=Math.sin(q.yaw);
-        let crest=-Infinity;
-        for(const du of [-w*.42,w*.42])for(const dv of [-.8,.8]){
-          const x=q.x+cs*du+sn*dv,z=q.z-sn*du+cs*dv;crest=Math.max(crest,ground(x,z));
-        }
-        const bottom=Math.max(2.8,crest-q.y+2.6)+(n%4===0?8.2:0);
-        const rays=readingRays(stage,q,w,h,bottom,course.length);
-        if(readableFraction(stage,rays,facePlate(q,w,h,bottom,.22))<.5)continue;
-        bulletinBoard(stage,q,w,h,bottom,style,cell,false,f,true);
-        readingWindows.push({x:q.x,z:q.z,width:w,height:h,eyes:rays.eyes,marketEyes:rays.eyes,targets:rays.targets});
-        placed.push({x:q.x,z:q.z,width:w});
-        done=true;
-      }
-    }
   }
 
   // ---- desert, forest and roadside landmarks -----------------------------
@@ -2123,8 +1993,6 @@ const MTMScenery = (() => {
       [.558,1,cells.radio], [.705,-1,cells.mtm], [.871,1,cells.club] ].forEach(args=>roadBoard(stage, ...args));
     reserveFlagViews(stage, desertFlags,1.9,4.7,6.3);
     roadsideBulletins(stage);
-    billboardFarm(stage);
-    projectBillboards(stage);
     // Isolated specimen cacti and small agave colonies follow sandy washes.
     for(let i=0;i<202;i++) {
       const near=i<72;
@@ -2178,8 +2046,6 @@ const MTMScenery = (() => {
       [.592,1,cells.radio],[.838,-1,cells.mtm],[.927,1,cells.club] ].forEach(args=>roadBoard(stage, ...args));
     reserveFlagViews(stage, forestFlags,3.25,4.5,6.4);
     roadsideBulletins(stage);
-    billboardFarm(stage);
-    projectBillboards(stage);
     for(let i=0;i<520;i++) {
       const side=pick([-1,1]),f=random();
       const p=courseFrame(f,side*(half+range(5,109)));
@@ -2463,8 +2329,6 @@ const MTMScenery = (() => {
       const p=courseFrame(f,side*(half+15.8));board(stage, frame(p.x,p.y,p.z,p.yaw+Math.PI*.82),10,2.91,cell,5.75);
     }
     roadsideBulletins(stage);
-    billboardFarm(stage);
-    projectBillboards(stage);
     for(let i=0;i<8;i++) {
       const p=courseFrame(.115+i*.109,pick([-1,1])*(half+28+range(0,9)));
       if(clear(p.x,p.z,3.45)) trailer(stage, p,pick(['#926780','#517888','#886987']));
