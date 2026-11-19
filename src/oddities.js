@@ -1,5 +1,8 @@
 /* Each attraction is scenery only. Its few moving rigid sections follow the
    supplied race clock, so replay, pause and reduced-motion poses are repeatable. */
+import { MTMCourses } from './course.js';
+import { MTMKit } from './kit.js';
+
 const MTMOddities = (() => {
   const T=THREE,tau=Math.PI*2,geometries=new Map(),colors=new Map();
   const matte=new T.MeshStandardMaterial({vertexColors:true,metalness:.08,roughness:.66,side:T.DoubleSide});
@@ -73,7 +76,7 @@ const MTMOddities = (() => {
     return {add,box,ball,rod,path,instance,finish};
   }
   function label(parent,title,sub,w,h,y,z,accent){
-    const c=document.createElement('canvas');c.width=512;c.height=128;const g=c.getContext('2d');
+    const c=MTMKit.canvas(512,128);const g=c.getContext('2d');
     g.fillStyle='#111a2b';g.fillRect(0,0,512,128);g.fillStyle=accent;g.fillRect(0,0,512,6);g.fillRect(0,5,8,123);
     g.textAlign='center';g.textBaseline='middle';g.fillStyle='#f7ffef';g.font='900 italic 65px Display, Impact, sans-serif';g.fillText(title,256,52,475);
     g.fillStyle=accent;g.font='bold 22px Mono, monospace';g.fillText(sub,256,102,471);
@@ -301,3 +304,5 @@ const MTMOddities = (() => {
   }
   return {attach,location,art:{builder,node,label}};
 })();
+
+export {MTMOddities};

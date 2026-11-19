@@ -1,6 +1,8 @@
 /* The old motor-court and theatre signs are still the original printed signs.
    Their strings of independent lamps follow the actual steel cutting patterns.
    All animation is sampled from the race clock, including instant replay. */
+import { MTMCelestial } from './celestial.js';
+
 const MTMElectric=(()=>{
   const T=THREE,TAU=2*Math.PI;
   const wired=new Set(['marquee','motel','blade','ticket','dialbox','shop','terminal']);
@@ -174,3 +176,5 @@ const MTMElectric=(()=>{
   }
   return {plan,attach,drawRim,drawSpills,lookouts};
 })();
+
+export {MTMElectric};

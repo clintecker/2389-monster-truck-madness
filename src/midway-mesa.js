@@ -1,5 +1,7 @@
 /* Blackout Mesa's roadside midway. A clock value and a decaying horn pulse
    completely determine each pose, including the simplified projection artwork. */
+import { MTMKit } from './kit.js';
+
 const MTMMesaMidway=(()=>{
   const pi=Math.PI,tau=2*pi,sin=Math.sin,cos=Math.cos;
   const dark='#192038',steel='#53657d',alloy='#abb9c4',white='#f5f5df';
@@ -12,11 +14,7 @@ const MTMMesaMidway=(()=>{
   }
   // Canvas helpers use the same metre scale as the mesh. The host supplies the
   // upward-positive transform and may call the drawing code in any camera mode.
-  function poly(c,pts,ink){c.fillStyle=ink;c.beginPath();c.moveTo(...pts[0]);for(const p of pts.slice(1))c.lineTo(...p);c.closePath();c.fill();}
-  function stroke(c,pts,w,ink){
-    c.lineWidth=w;c.strokeStyle=ink;c.lineJoin=c.lineCap='round';c.beginPath();c.moveTo(...pts[0]);for(const p of pts.slice(1))c.lineTo(...p);c.stroke();
-  }
-  function oval(c,x,y,rx,ry,ink,angle=0){c.fillStyle=ink;c.beginPath();c.ellipse(x,y,rx,ry,angle,0,tau);c.fill();}
+  const {paint} = MTMKit, poly = paint.poly, stroke = (c,pts,w,ink) => paint.stroke(c,pts,ink,w), oval = paint.oval;
   function box(c,x,y,w,h,ink){c.fillStyle=ink;c.fillRect(x-w/2,y-h/2,w,h);}
   function wheel(c,x,y,r){oval(c,x,y,r,r,dark);oval(c,x,y,r*.62,r*.62,alloy);oval(c,x,y,r*.23,r*.23,pink);}
 
@@ -743,3 +741,5 @@ const MTMMesaMidway=(()=>{
     {id:'mesa-carrion-luggage',crew:'Ivan',name:'Carrion Luggage',route:'return',f:.960,off:-31,radius:14.45,footprintRadius:8.55,width:16.95,height:12.90,ink:pink,reply:'The bird has claimed your baggage claim.',sound:'bell',build:vulture,draw:drawVulture}
   ];
 })();
+
+export {MTMMesaMidway};

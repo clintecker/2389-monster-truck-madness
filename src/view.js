@@ -1,5 +1,21 @@
 /* One renderer is reused by the showroom and race. The 2D projection shares the
    same camera, simulation and timing on devices that cannot create WebGL. */
+import { MTMCarnival } from './carnival.js';
+import { MTMCelestial } from './celestial.js';
+import { MTMCrowd } from './crowd.js';
+import { MTMElectric } from './electric.js';
+import { MTMFinish } from './finish.js';
+import { MTMMidway } from './midway.js';
+import { MTMOddities } from './oddities.js';
+import { MTMPhysics } from './physics.js';
+import { MTMProps } from './props.js';
+import { MTMScenery } from './scenery.js';
+import { MTMSoftwareRenderer } from './software.js';
+import { MTMSoilArt } from './soilart.js';
+import { MTMTrack } from './track.js';
+import { MTMTrucks } from './trucks.js';
+import { MTMWorld } from './world.js';
+
 const MTMView = (() => {
   const T=THREE, V=T.Vector3, cache=new Map(),rigs=new Map(),sprites=new Map(),shadowPool=[];
   let renderer=null,initialized=false,soft=null,scene=null,camera=null,sun=null,active=null,camMode=0,scale=1,garageTime=.56,garageModel=null,garageRigs=new Map(),garageScene=null,garageCam=null,garageIndex=0,garageTurn=0;
@@ -406,13 +422,13 @@ const MTMView = (() => {
     }else drawTruck(ctx,w*.5,h*.95,Math.min(w*.63,h*1.63),garageIndex,true,garageFit,garageSpring.bounce);
   }
   function sprite(view,index,tires=0){
-    const art=window.MTMFitmentArt;if(!art)return null;
+    const art=MTMFitmentArt;if(!art)return null;
     const key=view+':'+index+(view==='wheel'?':'+tires:'');
     if(!sprites.has(key)){const img=new Image();img.src=view==='wheel'?art.wheels[index][tires]:art[view][index];sprites.set(key,img);}
     return sprites.get(key);
   }
   function drawTruck(ctx,x,bottom,width,index,front,fit,compression=0){
-    const view=front?'front':'rear',img=sprite(view,index),art=window.MTMFitmentArt;
+    const view=front?'front':'rear',img=sprite(view,index),art=MTMFitmentArt;
     if(!img?.naturalWidth||!art)return;
     const {cellWidth:sw,cellHeight:sh}=art,t=fit?.tires??0,s=fit?.suspension??1;
     const dw=width/(art.bodyWidth?.[view]||.9),dh=dw*sh/sw*(1-compression*.20);
@@ -582,3 +598,5 @@ const MTMView = (() => {
   const clamp2=(v,a,b)=>Math.max(a,Math.min(b,v));
   return {raceStart,headLook,render,tour,traceStars,crowdMix,showroom,garageFrame,inspectWheel,testSuspension,resize,modeNames,turnGarage:v=>{garageTurn+=v;},cycle(){camMode=(camMode+1)%3;initialCamera=true;return modeNames[camMode];},startSignal(stage){active?.setStartSignal?.(stage);},get mode(){return camMode;},get webgl(){return !!renderer&&!renderer.isSoftware;},get scale(){return scale;},reduce(){if(renderer){const floor=renderer.isSoftware?Math.min(.55,445/Math.max(640,width)):.6;if(scale>floor+.015){scale=Math.max(floor,scale*.88);resize();}}},impact(v){shake=Math.max(shake,v);},snap(){initialCamera=true;},exitGarage(){wasGarage=false;},get initialized(){return initialized;}};
 })();
+
+export {MTMView};

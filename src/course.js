@@ -1,5 +1,7 @@
 /* Distances in metres. Each event uses an arc-length path for signage, timing,
    AI and the printed route map. The player drives freely in world space. */
+import { MTMKit } from './kit.js';
+
 const MTMCourses = (() => {
   const specs = [
     {id:'arizona', name:'Blackout Mesa', classic:'Arizona Rally', type:'Rally', place:'Arizona desert', surface:'Sand & hardpack', width:21, laps:1, entrants:4, checkpoints:[.11,.24,.37,.49,.62,.75,.88,1],
@@ -31,7 +33,7 @@ const MTMCourses = (() => {
       relief:[[-257,125,179,164,47],[-67,264,147,143,-18],[177,156,178,155,52],[310,-95,146,143,31],[42,-254,138,147,-19],[-121,-128,125,127,22]],
       jumps:[[.083,23,12,3.4,'earth'],[.198,24,12,3.3,'earth'],[.294,23,14,3.6,'earth'],[.382,23,12,3.1,'earth'],[.489,25,12,3.3,'rail'],[.579,21,12,2.9,'earth'],[.676,23,11,3.4,'earth'],[.773,20,12,2.6,'earth'],[.876,24,13,3.1,'earth']]}
   );
-  const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+  const {clamp} = MTMKit;
   const smooth=t=>t*t*(3-2*t);
   function make(spec) {
     const loop=spec.closed===true||spec.id==='eight';
@@ -217,3 +219,5 @@ const MTMCourses = (() => {
   }
   return Object.assign(events,{forDistance,recordKey,maxLaps});
 })();
+
+export {MTMCourses};

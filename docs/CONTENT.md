@@ -4,7 +4,7 @@
 
 Start in `src/course.js`. Give the event a unique `layoutKey`, select a supported environment family with `id`, then define its named event, nodes in metres, route closure, width, laps and checkpoint fractions. An environment ID selects the scenery family; a layout key distinguishes the physical road and its saved settings. Put gates far enough beyond a crest for a jumping truck to cross their planes and leave room beyond the finish for the turnaround.
 
-Use `forDistance` and `recordKey` to keep different physical routes and distances distinct. The special long-course selection for the classic Mesa and Loop is a single long lap. Check the start grid, a full course in both transmissions, the return road on circuits, and the fork at a crossing. A new event also needs a card image, the relevant cup membership in `app.js`, and a tile entry in `tools/build.py`.
+Use `forDistance` and `recordKey` to keep different physical routes and distances distinct. The special long-course selection for the classic Mesa and Loop is a single long lap. Check the start grid, a full course in both transmissions, the return road on circuits, and the fork at a crossing. A new event also needs a card image, the relevant cup membership in `app.js`, and a tile file named `tile-<event>.webp` in `src/`.
 
 ## Send a truck to the motor pool
 

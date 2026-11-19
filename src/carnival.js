@@ -1,6 +1,13 @@
 /* Every route has a permanent salvage market and a flying parade. Only their
    poses and horn responses change during a heat. The same survey feeds all
    three renderers, the trackside visitor camera and instant replay. */
+import { MTMCourses } from './course.js';
+import { MTMFinish } from './finish.js';
+import { MTMMidway } from './midway.js';
+import { MTMOddities } from './oddities.js';
+import { MTMParadeArt } from './parade-art.js';
+import { MTMSalvageArt } from './salvage-art.js';
+
 const MTMCarnival=(()=>{
   const T=THREE,art=MTMOddities.art,tau=Math.PI*2;
   const palettes={arizona:['#ff9863','#72f8d8','#f7cb64','#ff6ba4'],eight:['#b6a0ff','#82f5cc','#ef88ca','#ffd896'],indiana:['#ff659c','#8cecf1','#ffd572','#baa1ff']};
@@ -251,3 +258,5 @@ const MTMCarnival=(()=>{
   }
   return {plan,attach,flight,salute,particles};
 })();
+
+export {MTMCarnival};

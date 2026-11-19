@@ -1,5 +1,7 @@
 /* The Chicago midway at Overclock Strip. Its rides run on the race clock;
    each horn response is a pure pose that replays identically at the same time. */
+import { MTMKit } from './kit.js';
+
 const MTMStripMidway=(()=>{
   'use strict';
   const T=THREE,TAU=2*Math.PI,dark='#172237',frame='#465575',steel='#879cb3',ivory='#fff0cd';
@@ -36,9 +38,7 @@ const MTMStripMidway=(()=>{
     label(root,title,sub,w,h,y,z,color);
   }
   const clamp=x=>Math.max(0,Math.min(1,x||0));
-  function rect(c,x,y,w,h,ink){c.fillStyle=ink;c.fillRect(x,y,w,h);}
-  function oval(c,x,y,rx,ry,ink,angle=0){c.fillStyle=ink;c.beginPath();c.ellipse(x,y,rx,ry,angle,0,TAU);c.fill();}
-  function poly(c,p,ink){c.fillStyle=ink;c.beginPath();p.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.closePath();c.fill();}
+  const {paint} = MTMKit, rect = paint.rect, oval = paint.oval, poly = paint.poly;
   function line(c,p,ink,r){c.strokeStyle=ink;c.lineWidth=r;c.lineJoin='round';c.lineCap='round';c.beginPath();p.forEach(([x,y],i)=>i?c.lineTo(x,y):c.moveTo(x,y));c.stroke();}
   function ring(c,x,y,r,ink,w){c.strokeStyle=ink;c.lineWidth=w;c.beginPath();c.arc(x,y,r,0,TAU);c.stroke();}
   function star(c,x,y,r,ink){poly(c,silhouettes.star.map(([u,v])=>[x+u*r,y+v*r]),ink);}
@@ -859,3 +859,5 @@ const MTMStripMidway=(()=>{
     {id:'strip-municipal-tuba',crew:'Eden',name:'Municipal Tuba',f:.93,off:-27,radius:14.55,footprintRadius:5.06,width:8.78,height:14.47,ink:gold,reply:'The tuba has filed a noise complaint.',sound:'brass',build:tuba,draw:drawTuba}
   ];
 })();
+
+export {MTMStripMidway};

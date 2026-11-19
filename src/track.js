@@ -1,11 +1,12 @@
 /* The terrain, road surface and physical takeoffs share the same height function.
    Most detail is painted into repeating gravel and track textures to keep the
    number of objects independent of the length of the race. */
+import { MTMCelestial } from './celestial.js';
+import { MTMFinish } from './finish.js';
+import { MTMKit } from './kit.js';
+
 const MTMTrack = (() => {
-  const T=THREE,clamp=(x,a,b)=>Math.max(a,Math.min(b,x));
-  function rng(seed){return ()=>{seed=(Math.imul(1664525,seed)+1013904223)>>>0;return seed/4294967296;};}
-  function canvas(w,h){const c=document.createElement('canvas');c.width=w;c.height=h;return c;}
-  function map(c,wrap=true){const tex=new T.CanvasTexture(c);tex.colorSpace=T.SRGBColorSpace;if(wrap)tex.wrapS=tex.wrapT=T.RepeatWrapping;tex.anisotropy=4;return tex;}
+  const T=THREE,{clamp, rng, canvas, map} = MTMKit;
   const palettes={
     arizona:{road:[106,91,103],ground:[65,49,67],gravel:'#d3b0ba',fog:0x444058},
     eight:{road:[80,99,100],ground:[38,54,55],gravel:'#b3cec3',fog:0x334951},
@@ -274,8 +275,10 @@ const MTMTrack = (() => {
     const world=new T.Group(),fog=palettes[c.id].fog;
     world.add(terrainMesh(c),ribbon(c,c.loop?0:-24,c.loop?c.length:c.length+29,()=>0,c.width));
     if(c.id==='eight')world.add(ribbon(c,c.length*.688,c.length*.791,t=>-14*Math.sin(t*Math.PI)**1.4,10,true));
-    const setStartSignal=gatesAndSigns(world,c),cars=landmarks(world,c);if(window.MTMScenery)MTMScenery.build(world,c.ground,c);
+    const setStartSignal=gatesAndSigns(world,c),cars=landmarks(world,c);if(MTMScenery)MTMScenery.build(world,c.ground,c);
     const finishShow=MTMFinish.attach(world,c,board);return {world,finishShow,sky:MTMCelestial.build(c.id),cars,fog,setStartSignal};
   }
   return {build,canvas,map,rng};
 })();
+
+export {MTMTrack};

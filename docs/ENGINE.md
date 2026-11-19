@@ -18,4 +18,4 @@
 
 `finish.js` locates the turnaround relative to the last gate. The course and its tour camera share the same bleachers and show clock. Firework shells have separate lift, flight and break times, with different particle paths, colors, descent and decay. Sound cues carry the shell type, distance and simulated propagation delay into `audio.js`. A distant burst can therefore be visible before its report arrives. Reduced-motion mode presents a static sample of the display.
 
-The HTML builder concatenates scripts in dependency order, embeds images and fonts as data URLs, and bundles a copy of the untouched HTML shell. **Save offline** reconstructs the distribution from that shell and its embedded payloads. It does not serialize a live race or the player's local save.
+The HTML builder copies the ES modules, fonts, artwork and the compiled rasterizer into `dist/` and writes an index page that loads Three.js as a classic script and `app.js` as a module. Serve the directory over http; a browser will not resolve modules from a `file://` URL. The page does not serialize a live race or the player's local save.

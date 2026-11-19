@@ -506,3 +506,5 @@ const MTMSponsorArt = (() => {
     plate('jeff','Jeff',"YOU'VE GOT JEFF.",'#f68d78','#fff1d2',jeff)
   ];
 })();
+
+export {MTMSponsorArt};

@@ -1,6 +1,8 @@
 /* Each course uses one observed-data sky, fixed to the world rather than
    painted on the camera. The same coordinates, colors and Moon feed WebGL,
    the software rasterizer and the emergency Canvas renderer. */
+import { MTMKit } from './kit.js';
+
 const MTMCelestial=(()=>{
   'use strict';
   const T=THREE,tau=2*Math.PI,rad=Math.PI/180,clip=(x,a=0,b=1)=>Math.max(a,Math.min(b,x));
@@ -35,7 +37,7 @@ const MTMCelestial=(()=>{
   const sceneAssets=new Map(),colorChips=[],starWash=[];
   const decode=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
   let rawStars=null,clouds=null,dust=null,starTexture=null;
-  const canvas=(w,h)=>{const c=document.createElement('canvas');c.width=w;c.height=h;return c;};
+  const {canvas} = MTMKit;
   const texture=c=>{const t=new T.CanvasTexture(c);t.colorSpace=T.SRGBColorSpace;return t;};
   function moon(id){
     const q=siteData[id],v=q.moon,c=regions[id];
@@ -272,3 +274,5 @@ const MTMCelestial=(()=>{
   }
   return {build,draw,moon,starField,focus,credits};
 })();
+
+export {MTMCelestial};

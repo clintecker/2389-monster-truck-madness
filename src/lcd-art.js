@@ -1,6 +1,8 @@
 /* Seven pirate-TV transmitters. Each installation has an authored, looping
    pixel film, a horn cut-in, and a physical cabinet. A single immutable reel
    per station supplies the WebGL, software 3D and projected Canvas screens. */
+import { MTMKit } from './kit.js';
+
 const MTMLcdArt=(()=>{
   'use strict';
   const T=THREE,W=144,H=80,pad=2,cellW=W+2*pad,cellH=H+2*pad,columns=6;
@@ -316,9 +318,7 @@ const MTMLcdArt=(()=>{
 
   // Each compact film sheet fits the software renderer's 1,024-pixel texture
   // limit. Two pixels of extrusion around each cel keep adjacent cuts separate.
-  function createCanvas(w,h){
-    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=h;return canvas;
-  }
+  function createCanvas(w,h){return MTMKit.canvas(w,h);}
   function cell(n){return {x:(n%columns)*cellW+pad,y:Math.floor(n/columns)*cellH+pad};}
   function imageFor(s){
     if(imageCache.has(s.id))return imageCache.get(s.id);
@@ -595,3 +595,5 @@ const MTMLcdArt=(()=>{
       film:parkingFilm,offset:7,caption:'A legal parking maneuver. An exceptionally long ticket.',reply:'The fine print has received a fine for excessive length.',sound:'coin'}
   ].map(program);
 })();
+
+export {MTMLcdArt};

@@ -23,7 +23,7 @@ jobs:
           python-version: '3.12'
       - run: npm ci
       - run: npm run build
-      - run: git diff --exit-code -- dist/index.html
+      - run: git add -A dist && git diff --cached --exit-code -- dist
       - run: npm test
       - run: npm run test:render
       - run: npm run test:canvas

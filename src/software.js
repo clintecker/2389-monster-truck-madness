@@ -68,3 +68,5 @@ function MTMSoftwareRenderer(){
     frameCap=w*h;pixel=alloc(frameCap*4);depth=alloc(frameCap*4);
   },domElement:canvas,isSoftware:true,shadowMap:{enabled:false},setPixelRatio(v){ratio=v;},setSize,render};
 }
+
+export {MTMSoftwareRenderer};

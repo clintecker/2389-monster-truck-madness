@@ -2,6 +2,8 @@
    and each bank of chasing lamps share a drawing measured in sign-shop units.
    The bezels and enamel are painted once. Bright glass and moving bulbs are
    separate raised meshes with graduated halos, including in the CPU renderer. */
+import { MTMKit } from './kit.js';
+
 const MTMNeonArt=(()=>{
   'use strict';
   const T=THREE,W=120,H=100,tau=Math.PI*2;
@@ -240,7 +242,7 @@ const MTMNeonArt=(()=>{
   // The coloured tubes are raised independently, so they also read edge-on.
   function plate(d){
     if(d.card)return d.card;
-    const c=document.createElement('canvas'),scale=5;c.width=W*scale;c.height=H*scale;
+    const c=MTMKit.canvas(W*5,H*5),scale=5;
     const ctx=c.getContext('2d');ctx.scale(scale,scale);ctx.lineCap='round';ctx.lineJoin='round';
     for(const panel of d.panels){
       const points=railOf(panel.outer);polygon(ctx,points);
@@ -411,7 +413,7 @@ const MTMNeonArt=(()=>{
     ctx.fillStyle='#6c7585';ctx.fillRect(Math.min(lo,hi)-.09,1.345,Math.abs(hi-lo)+.18,.11);
     ctx.translate(0,d.lift+H*d.unit);ctx.scale(d.unit,-d.unit);ctx.translate(-W/2,0);
     if(!d.flatFixed){
-      const c=document.createElement('canvas');c.width=W*4;c.height=H*4;const g=c.getContext('2d');g.scale(4,4);
+      const c=MTMKit.canvas(W*4,H*4);const g=c.getContext('2d');g.scale(4,4);
       // The folded steel cabinet has a visible lower and right return, with
       // the same irregular silhouette as the model's extruded edge.
       g.save();g.translate(1.25,1.35);for(const panel of d.panels){polygon(g,railOf(panel.outer));g.fillStyle='#34364c';g.fill();}g.restore();
@@ -420,7 +422,7 @@ const MTMNeonArt=(()=>{
     ctx.drawImage(d.flatFixed,0,0,W,H);
     const k=stateKey(t,p,d),s=state(d,k);
     if(!s.card){
-      const c=document.createElement('canvas');c.width=W*2;c.height=H*2;const g=c.getContext('2d');g.scale(2,2);paintGlass(g,s.strokes,s.dots);s.card=c;
+      const c=MTMKit.canvas(W*2,H*2);const g=c.getContext('2d');g.scale(2,2);paintGlass(g,s.strokes,s.dots);s.card=c;
     }
     ctx.drawImage(s.card,0,0,W,H);
     const avg=(d.columns[0][0]+d.columns[1][0])/2;
@@ -436,3 +438,5 @@ const MTMNeonArt=(()=>{
       build:(root,art)=>build(d,root,art),draw:(ctx,t,p)=>flat(d,ctx,t,p)};
   });
 })();
+
+export {MTMNeonArt};

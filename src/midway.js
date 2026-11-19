@@ -1,5 +1,19 @@
 /* Put each attraction in the physical circuit. The same surveyed positions
    feed the race renderer, the canvas fallback, horn responses and track tour. */
+import { MTMCarnival } from './carnival.js';
+import { MTMCourses } from './course.js';
+import { MTMFinish } from './finish.js';
+import { MTMHoloArt } from './holo-art.js';
+import { MTMKit } from './kit.js';
+import { MTMLcdArt } from './lcd-art.js';
+import { MTMLoopMidway } from './midway-loop.js';
+import { MTMMesaMidway } from './midway-mesa.js';
+import { MTMNeonArt } from './neon-art.js';
+import { MTMOddities } from './oddities.js';
+import { MTMProjectFair } from './project-fair.js';
+import { MTMSponsorArt } from './sponsor-art.js';
+import { MTMStripMidway } from './midway-strip.js';
+
 const MTMMidway=(()=>{
   const T=THREE,posters=new Map(),materials=new Map(),art=MTMOddities.art;
   const programs={arizona:MTMMesaMidway,eight:MTMLoopMidway,indiana:MTMStripMidway};
@@ -24,7 +38,7 @@ const MTMMidway=(()=>{
   };
   function poster(design){
     if(!posters.has(design.id)){
-      const canvas=document.createElement('canvas');canvas.width=640;canvas.height=256;
+      const canvas=MTMKit.canvas(640,256);
       design.draw(canvas.getContext('2d'),640,256);posters.set(design.id,canvas);
     }
     return posters.get(design.id);
@@ -278,3 +292,5 @@ const MTMMidway=(()=>{
   }
   return {plan,attach,signal,response,near,hornWave,poster,catalog,portrait,supports};
 })();
+
+export {MTMMidway};

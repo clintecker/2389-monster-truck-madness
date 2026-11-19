@@ -1,7 +1,11 @@
 /* Fixed-step four-wheel arcade handling. Ground contact and race timing remain
    independent of rendering, camera choice, frame rate, and input device. */
+import { MTMContact } from './contact.js';
+import { MTMKit } from './kit.js';
+import { MTMWorld } from './world.js';
+
 const MTMPhysics = (() => {
-  const clamp=(x,a,b)=>Math.max(a,Math.min(b,x)),lerp=(a,b,t)=>a+(b-a)*t;
+  const {clamp, mix: lerp} = MTMKit;
   const wrap=a=>Math.atan2(Math.sin(a),Math.cos(a));
   function contact(c,x,z,yaw){
     const sn=Math.sin(yaw),cs=Math.cos(yaw),fz=cs*1.65,fx=sn*1.65,sx=cs*1.33,sz=-sn*1.33;
@@ -260,3 +264,5 @@ const MTMPhysics = (() => {
     for(let i=0;bots.some(a=>a.finishTime===null)&&i<5000;i++){sim.time+=.05;for(const a of bots)aiStep(sim,a,.05,false);}return bots.map(a=>({truck:a.truck,time:a.finishTime,me:false,heat:2}));}
   return {create,drive,stage,releaseGrid,stepSpring,shiftGear,recover,standings,otherHeat,contact,wrap,clamp};
 })();
+
+export {MTMPhysics};

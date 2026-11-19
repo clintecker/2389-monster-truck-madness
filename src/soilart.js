@@ -1,5 +1,7 @@
 /* The visible mud uses exactly the same wheel-compressed height samples as
    suspension contact. Only patches with a new revision upload any vertices. */
+import { MTMWorld } from './world.js';
+
 const MTMSoilArt = (() => {
   function attach(world,c,soil){
     const T=THREE,{cols,rows,uplift}=MTMWorld;
@@ -35,3 +37,5 @@ const MTMSoilArt = (() => {
   }
   return {attach};
 })();
+
+export {MTMSoilArt};

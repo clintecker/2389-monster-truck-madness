@@ -1,0 +1,22 @@
+2389 NIGHT SKIES
+
+Lunar surface
+NASA’s Scientific Visualization Studio. Ernie Wright (STC), visualizer, and Noah Petro (NASA/GSFC), scientist. The CGI Moon Kit uses Lunar Reconnaissance Orbiter Camera (LROC) reflectance and Lunar Orbiter Laser Altimeter (LOLA) measurements. This game projects the December 2025 color mosaic and the 2019 elevation map into three grayscale, topographically shaded lunar disks. Libration, the solar terminator and sky orientation are calculated for each race date.
+https://svs.gsfc.nasa.gov/4720/
+https://www.nasa.gov/nasa-brand-center/images-and-media/
+
+Milky Way
+NASA/Goddard Space Flight Center Scientific Visualization Studio. Ernie Wright (STC). Gaia DR2 data from ESA/Gaia/DPAC. The diffuse equatorial background from Deep Star Maps 2020 is resampled into luminance and color-difference maps. The renderer rotates it to the local sky and applies atmospheric attenuation and urban skyglow.
+https://svs.gsfc.nasa.gov/4851/
+https://gea.esac.esa.int/archive/
+https://www.nasa.gov/nasa-brand-center/images-and-media/
+
+Bright-star catalog
+HYG Database v4.1, David Nash / Astronexus. HYG incorporates the Hipparcos, Yale Bright Star and Gliese catalogs. The 5,346-record subset in this game and its adaptations are available under Creative Commons Attribution-ShareAlike 4.0 International. The subset omits the Sun, selects stars with apparent visual magnitude at or above the brightness of magnitude 6.05, and advances their J2000-frame Cartesian coordinates to 2389 using the catalog velocities. Each six-byte record holds little-endian 16-bit right ascension and declination, apparent V magnitude and B−V color index. A neutral color is supplied when B−V is absent.
+https://github.com/astronexus/HYG-Database/tree/main/hyg/CURRENT
+https://github.com/astronexus/HYG-Database/blob/main/hyg/README.md
+https://creativecommons.org/licenses/by-sa/4.0/
+
+Ephemerides
+Build-time positions and orientations calculated with PyEphem 4.2.1, with the tracks’ fictional compass orientations mapped to their respective local skies. The in-race lunar disks are enlarged for visibility.
+https://rhodesmill.org/pyephem/

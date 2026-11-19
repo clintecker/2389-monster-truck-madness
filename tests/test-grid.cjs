@@ -1,7 +1,7 @@
 /* Check staging, green-light timing and engine behavior in simulation time. */
-const fs=require('node:fs'),vm=require('node:vm'),assert=require('node:assert/strict');
-global.THREE=require('../src/three.min.js');
-for(const n of ['course','world','contact','physics','motion'])vm.runInThisContext(fs.readFileSync(__dirname+'/../src/'+n+'.js','utf8'),{filename:n});
+const assert=require('node:assert/strict');
+require('../src/three.min.js');global.THREE=globalThis.THREE;
+require('./support/bundle.cjs').run(['kit','course','world','contact','physics','motion']);
 const P=MTMPhysics,dt=1/60,gas={throttle:1,brake:0,steer:0,handbrake:false},off={...gas,throttle:0};
 const make=(layout=MTMCourses[2],manual=0)=>P.create(layout,0,{difficulty:0,tires:0,suspension:1,gearing:1,transmission:manual});
 const coords=g=>[g.p,...g.ai].map(r=>[r.x,r.y,r.z,r.progress,r.yaw]);

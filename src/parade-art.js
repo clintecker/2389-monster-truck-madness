@@ -1,5 +1,7 @@
 /* Kinetic airshow floats. Models are broadside to local +Z, origin beneath
    the float. Animation is a pure function of course time and horn response. */
+import { MTMKit } from './kit.js';
+
 const MTMParadeArt=(()=>{
   'use strict';
   const T=THREE,turn=Math.PI*2,pi=Math.PI,meshCache=new Map(),decalCache=new Map();
@@ -47,10 +49,8 @@ const MTMParadeArt=(()=>{
   }
 
   // Flat front elevations use the same metres and moving joint angles as the meshes.
-  function poly(c,pts,fill){c.fillStyle=fill;c.beginPath();c.moveTo(...pts[0]);for(let i=1;i<pts.length;i++)c.lineTo(...pts[i]);c.closePath();c.fill();}
-  function oval(c,x,y,rx,ry,fill,rot=0){c.fillStyle=fill;c.beginPath();c.ellipse(x,y,rx,ry,rot,0,turn);c.fill();}
-  function rect(c,x,y,w,h,fill){c.fillStyle=fill;c.fillRect(x,y,w,h);}
-  function line(c,pts,fill,width){c.strokeStyle=fill;c.lineWidth=width;c.lineCap='round';c.lineJoin='round';c.beginPath();c.moveTo(...pts[0]);for(let i=1;i<pts.length;i++)c.lineTo(...pts[i]);c.stroke();}
+  const {paint} = MTMKit, poly = paint.poly, oval = paint.oval, rect = paint.rect;
+  const line = (c,pts,fill,width) => paint.stroke(c,pts,fill,width);
   function loop(c,x,y,rx,ry,ink,width){c.strokeStyle=ink;c.lineWidth=width;c.beginPath();c.ellipse(x,y,rx,ry,0,0,turn);c.stroke();}
   function glyph(c,text,x,y,w,h,ink){c.save();c.translate(x,y);c.scale(1,-1);c.fillStyle=ink;c.font='900 italic '+h+'px Display, Impact, sans-serif';c.textAlign='center';c.textBaseline='middle';c.fillText(text,0,0,w);c.restore();}
   function plate(c,text,x,y,w,h,ink){rect(c,x-w*.5,y-h*.5,w,h,night);rect(c,x-w*.5,y+h*.39,w,h*.11,ink);glyph(c,text,x,y-.015,w*.94,h*.79,cream);}
@@ -536,3 +536,5 @@ const MTMParadeArt=(()=>{
     draw(c,t,p){c.save();c.translate(x,y);draw(c,t,p);c.restore();}
   }));
 })();
+
+export {MTMParadeArt};
