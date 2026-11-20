@@ -22,7 +22,7 @@ const MTMWorld = (() => {
     arizona:[[.031,'pylon',1],[.083,'barrels',-1],[.137,'barricade',1],[.215,'tires',-1],[.331,'barrels',1],[.384,'pylon',-1],[.447,'barricade',1],[.526,'tires',-1],[.654,'barrels',1],[.722,'pylon',1],[.807,'barricade',-1],[.919,'tires',1]],
     eight:[[.043,'pylon',-1],[.115,'barrels',-1],[.181,'barricade',1],[.23,'tires',-1],[.381,'barrels',1],[.435,'pylon',1],[.559,'tires',-1],[.622,'barricade',1],[.809,'barrels',1],[.904,'pylon',-1]],
     indiana:[[.055,'pylon',1],[.118,'barrels',1],[.185,'tires',-1],[.363,'barricade',-1],[.431,'pylon',1],[.532,'tires',1],[.611,'barrels',-1],[.786,'barricade',1],[.855,'tires',-1],[.937,'pylon',1]],
-    office:[[.06,'pylon',1],[.14,'barrels',-1],[.30,'pylon',-1],[.40,'pylon',1],[.58,'barrels',1],[.66,'pylon',-1],[.84,'pylon',1]]
+    office:[]
   };
   function props(c){
     const list=[];
@@ -40,9 +40,9 @@ const MTMWorld = (() => {
     }
     // Loose lots sit on alternate verges. Keep every physics body away from
     // the crossing, alternate dirt shortcut, starting grid and checkpoint flags.
-    const stock=['cart','crt','sofa','mailbox'],step=c.id==='indiana'?21:29;
+    const stock=c.id==='office'?[]:['cart','crt','sofa','mailbox'],step=c.id==='indiana'?21:29;
     const bypass=c.id==='eight'?Array.from({length:29},(_,i)=>c.at(c.length*(.688+.103*i/28),-14*Math.sin(Math.PI*i/28)**1.4)):[];
-    for(let i=0,s=17;s<c.length-8;i++,s+=step){
+    for(let i=0,s=17;stock.length&&s<c.length-8;i++,s+=step){
       const side=i%2?1:-1;
       for(let j=0;j<(i%3===0?2:1);j++){
         const p=c.at(s+j*4.2,side*(c.width*.50+.35+(i%3)*.55+j*.65));
