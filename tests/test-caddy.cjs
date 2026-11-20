@@ -27,6 +27,20 @@ const triangles = rig => {
   return Math.round(total);
 };
 
+/* Hue in degrees. Shading moves a baked livery colour around the brightness axis
+   but not around the hue circle, so hue is how a panel is recognised on screen. */
+const hueOf = (r, g, b) => {
+  const max = Math.max(r, g, b), min = Math.min(r, g, b), span = max - min;
+  if (!span) return 0;
+  const hue = max === r ? (g - b) / span : max === g ? 2 + (b - r) / span : 4 + (r - g) / span;
+  return (hue * 60 + 360) % 360;
+};
+const hueFamily = (r, g, b) => {
+  if (Math.max(r, g, b) - Math.min(r, g, b) < 18) return 'grey';
+  const hue = hueOf(r, g, b);
+  return hue < 20 || hue > 330 ? 'red' : hue < 70 ? 'yellow' : hue < 160 ? 'green' : hue < 280 ? 'blue' : 'red';
+};
+
 (async () => {
   const {MTMTrucks} = await import(root + '/trucks.js');
   const {MTMFitmentArt} = await import(root + '/fitment-sprites.js');
@@ -54,6 +68,73 @@ const triangles = rig => {
   assert(!MTMCaddyModel.parts.some(part => /wheel|axle|coilover|frame/i.test(part.name)), 'running gear comes from the rig, not the export');
   assert(MTMCaddyModel.triangles < 40000, `the baked body stays a low-detail model (${MTMCaddyModel.triangles} triangles)`);
   assert(!fs.existsSync(path.join(root, 'model')), 'no CAD buffer directory ships');
+
+  // Every part carries the livery the approved export paints on it. A corner
+  // colour read with the wrong stride used to hand two thirds of the body
+  // another face's colour and the rest nothing at all, which reached the screen
+  // as black panels and shards; the palette is the cheapest place to pin that.
+  const baked = part => {
+    const raw = text => Uint8Array.from(Buffer.from(text, 'base64'));
+    return {colours: raw(part.colors), indices: raw(part.indices), position: raw(part.positions)};
+  };
+  for (const part of MTMCaddyModel.parts.filter(part => part.name.startsWith('shell '))) {
+    const buffer = baked(part).colours;
+    let darkest = 255;
+    for (let i = 0; i < buffer.length; i += 3) darkest = Math.min(darkest, (buffer[i] + buffer[i + 1] + buffer[i + 2]) / 3);
+    assert(darkest > 24, `${part.name} keeps a readable palette (darkest vertex colour ${darkest.toFixed(0)}/255)`);
+  }
+  const paintHues = new Set();
+  const paintColours = baked(MTMCaddyModel.parts.find(part => part.name === 'shell paint')).colours;
+  for (let i = 0; i < paintColours.length; i += 3) paintHues.add(hueOf(paintColours[i], paintColours[i + 1], paintColours[i + 2]));
+  const hueFamilies = new Set([...paintHues].map(hue => hue < 20 || hue > 330 ? 'red' : hue < 70 ? 'yellow' : hue < 160 ? 'green' : 'blue'));
+  assert.deepEqual([...hueFamilies].sort(), ['blue', 'green', 'red', 'yellow'],
+    `the harlequin livery survives the bake (hue families: ${[...hueFamilies].sort().join(', ')})`);
+
+  // The chase camera looks straight at the tailgate. Rendered through the game's
+  // own software rasteriser it must come back as one closed blue panel: the
+  // corners that were read with the wrong stride left black shards on it, and the
+  // reduction tore the letter band open far enough to show the far interior —
+  // the green fender and the red door — through the slit.
+  {
+    const staged = path.join(root, '.baked-software.mjs');
+    fs.writeFileSync(staged, fs.readFileSync(path.join(root, 'software.js'), 'utf8')
+      .replace('/*__WASM__*/', fs.readFileSync(path.join(root, 'raster.wasm')).toString('base64')));
+    try {
+      const {MTMSoftwareRenderer} = await import(staged);
+      const scene = new THREE.Scene();
+      scene.background = new THREE.Color('#111a2b');
+      scene.userData.softwareTint = [.88, .94, 1];
+      const shown = MTMTrucks.make(7, true, {tires: 1, suspension: 1});
+      scene.add(shown.root);
+      const camera = new THREE.PerspectiveCamera(30, 320 / 200, .1, 90);
+      camera.position.set(0, 2.6, -5.2);
+      camera.lookAt(0, 2.15, -2.4);
+      const renderer = MTMSoftwareRenderer();
+      renderer.setPixelRatio(1);
+      renderer.setSize(320, 200);
+      renderer.render(scene, camera);
+      const frame = renderer.domElement.getContext('2d').getImageData(0, 0, 320, 200).data;
+      // The flat middle of the panel, 3 cm inside its outer skin.
+      const corners = [[-0.6, 2.12], [0.6, 2.12], [0.6, 2.52], [-0.6, 2.52]].map(([x, y]) => {
+        const point = new THREE.Vector3(x, y, -2.56).project(camera);
+        return [(point.x + 1) * 160, (1 - point.y) * 100];
+      });
+      const seen = {blue: 0, yellow: 0, red: 0, green: 0, grey: 0, other: 0};
+      let total = 0;
+      for (let y = Math.round(Math.min(...corners.map(c => c[1]))); y <= Math.round(Math.max(...corners.map(c => c[1]))); y++)
+        for (let x = Math.round(Math.min(...corners.map(c => c[0]))); x <= Math.round(Math.max(...corners.map(c => c[0]))); x++) {
+          const at = (y * 320 + x) * 4;
+          seen[hueFamily(frame[at], frame[at + 1], frame[at + 2])]++;
+          total++;
+        }
+      assert(total > 200, `the tailgate covers real pixels (${total})`);
+      assert(seen.blue / total > .8, `the tailgate reads as one blue panel (${(seen.blue / total * 100).toFixed(0)}% blue of ${total} pixels)`);
+      assert((seen.green + seen.red) / total < .02,
+        `nothing behind the tailgate shows through it (${seen.green} green, ${seen.red} red of ${total} pixels)`);
+    } finally {
+      fs.rmSync(staged, {force: true});
+    }
+  }
 
   // Same construction for the race and the showroom, and the rig reuses the
   // fleet's running gear so pose() articulates it like every other truck.
@@ -124,6 +205,15 @@ const triangles = rig => {
   assert.match(css, /#home\[data-truck="7"\] \.hero:before \{background-image:url\('cover-caddy\.webp'\);\}/, 'home cover rule');
   const cover = path.join(root, 'cover-caddy.webp');
   assert(fs.existsSync(cover), 'home cover asset ships');
+  // A bad output must fail before the importer even tries to load its source.
+  for (const flag of ['--cover', '--report']) {
+    for (const output of [cover, path.join(root, '../dist/cover-caddy.webp')]) {
+      const run = require('node:child_process').spawnSync(process.execPath,
+        [path.join(root, '../tools/bake-caddy-model.cjs'), '--source', path.join(root, 'no-cad-here'), flag, output], {encoding: 'utf8'});
+      assert.equal(run.status, 2, `${flag} cannot target ${output}`);
+      assert.match(run.stderr, /shipped Caddy cover/);
+    }
+  }
   const image = await cn.loadImage(fs.readFileSync(cover));
   assert.equal(image.width, 1716, 'cover matches the other home images');
 

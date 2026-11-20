@@ -36,8 +36,15 @@ const OUTPUT = path.join(root, 'caddy-model.js');
    collapses, and the thin dark groups are allowed to fold because their strips
    are a millimetre wide and read as shadow at any play distance. The split
    follows what a viewer resolves: the painted skin carries the shape, the seals
-   and lining carry the depth cues, the lamps carry the joke. */
-const BUDGET = {paint: 15000, glass: 360, trim: 6000, lining: 1600, hardware: 1800};
+   and lining carry the depth cues, the lamps carry the joke.
+
+   The glazing is the exception: it is a set of curved panes and quarterlights,
+   and reduced ten to one it tears into loose sheets with an 86 mm p99 deviation
+   from the approved surface -- holes in the windscreen and the vent windows at
+   any chase distance. Kept closer to whole (2599 triangles, p99 under a
+   millimetre) it costs 2 239 triangles and 16 KB gzipped, and no frame time
+   worth measuring. */
+const BUDGET = {paint: 15000, glass: 2600, trim: 6000, lining: 1600, hardware: 1800};
 
 /* Faces thinner than this are below the resolution of any game camera. */
 const MIN_AREA = 4e-8;
@@ -168,7 +175,11 @@ function buildMesh(part) {
   const triangles = [], corners = [];
   for (const t of keep) {
     triangles.push(tri[t], tri[t + 1], tri[t + 2]);
-    for (let j = 0; j < 9; j++) corners.push(corner[t * 9 + j]);
+    /* `t` counts indices, so the triangle it belongs to owns corners
+       t * 3 .. t * 3 + 8. Reading from t * 9 instead walks into the following
+       triangles and off the end of the array, which hands most corners another
+       face's livery colour and the last third of the mesh nothing at all. */
+    for (let j = 0; j < 9; j++) corners.push(corner[t * 3 + j]);
   }
   const split = splitBowties(px, py, pz, triangles, corners);
   return {
@@ -780,6 +791,19 @@ function main() {
     console.error('usage: node tools/bake-caddy-model.cjs --source <v6 site directory> [--report <json>] [--cover <webp>]');
     process.exit(2);
   }
+  // Reject shipped art before importing or writing the model. Check file identity
+  // too: a symlink, hard link or case-insensitive spelling may name the same file.
+  for (const file of [coverAt, reportAt].filter(Boolean)) {
+    const output = fs.statSync(file, {throwIfNoEntry: false});
+    for (const dir of [root, path.resolve(root, '../dist')]) {
+      const shipped = path.join(dir, 'cover-caddy.webp');
+      const art = fs.statSync(shipped, {throwIfNoEntry: false});
+      if (file === shipped || (output && art && output.dev === art.dev && output.ino === art.ino)) {
+        console.error('The shipped Caddy cover is separate artwork. Choose a scratch output path.');
+        process.exit(2);
+      }
+    }
+  }
   const parts = sceneParts(source);
   const buckets = {
     paint: parts.filter(p => p.mesh === 'shell' && p.name === 'paint'),
@@ -826,10 +850,7 @@ function main() {
 }
 
 
-/* The lobby cover: a wide, dark frame with the truck on the right so the menus
-   keep the left half. It is rendered from the same rig the game builds -- body,
-   wheels, axles and coilovers -- through the game's own software rasteriser, so
-   the home screen cannot drift away from the truck in the garage. */
+/* Optional scratch preview of the game rig, not the illustrated lobby cover. */
 async function cover(file) {
   const {createCanvas, loadImage} = require('@napi-rs/canvas');
   const project = path.resolve(__dirname, '..');

@@ -14,6 +14,8 @@ Use the same model construction for the race and showroom. Add an actual front/r
 
 After editing a research rig, run `node tools/bake-research-fleet.cjs` to regenerate its Canvas views from the race mesh. Each sheet holds three tire choices across and three suspension settings down. The garage cover is a separate wide illustration with the vehicle on the right so the lobby controls stay readable.
 
+For a Caddy model preview, pass a scratch path such as `--cover /tmp/caddy-model-preview.webp` to `tools/bake-caddy-model.cjs`. Omit `--cover` for a normal model bake. Keep the illustrated home cover in `src/cover-caddy.webp`; the build copies it to `dist/`.
+
 ## Sell a project to the wrong audience
 
 A short two-line pitch survives a drive-by. Reserve the long joke for the tour. The audience is part of the gag: Dot Viewer advertises **MAP THE MUSTARD** to hot dog vendors and **TILT THE GRAPH** to pinball players.

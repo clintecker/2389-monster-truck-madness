@@ -14,7 +14,14 @@ const MTMTrucks = (() => {
     {name:'Mux Switchblade',color:'#35f3cf',number:'23',ink:'#102938',paint:'#166a75',highlight:'#8be7cf',accent:'#75ffe3',trim:'#e65798',lamp:'#fff2b0'},
     {name:'Orrery Orbital',color:'#ce9aff',number:'89',ink:'#342944',paint:'#755197',highlight:'#f0c881',accent:'#d1a5ff',trim:'#78ecfa',lamp:'#f9e7ff'},
     {name:'Soloclaw',color:'#ff815e',number:'38',ink:'#3c2229',paint:'#ac453e',highlight:'#ff895e',accent:'#cfff8c',trim:'#fcad51',lamp:'#ffebac'},
-    {name:'VW Caddy Mk1 Parts Runner',color:'#f2c12a',number:'83',ink:'#1b2233',paint:'#ad8500',highlight:'#ffd75e',accent:'#f6f2e6',trim:'#b0151c',lamp:'#ffe9b4'}
+    // The motor pool reserves Harlequin paint for four-door VWs and this Caddy
+    // pickup has two, which is exactly the argument Dylan wants to have: he
+    // loves VWs and counts the hood and the tailgate as the missing pair. The
+    // three beats beneath are the whole joke and app.js reads them in the
+    // garage, on the starting grid and on the results sheet. No other rig
+    // carries a motorPool entry, so nothing else in the fleet is affected.
+    {name:'VW Caddy Mk1 Parts Runner',color:'#f2c12a',number:'83',ink:'#1b2233',paint:'#ad8500',highlight:'#ffd75e',accent:'#f6f2e6',trim:'#b0151c',lamp:'#ffe9b4',
+      motorPool:{garage:'Motor pool rule · Harlequin paint is only for four-door VWs.',grid:'Dylan counts #83’s hood and tailgate as doors.',signoff:'Dylan signed the paint order himself · four doors, strictly speaking.'}}
   ];
   const sideZ = 2.78, sideTop = 3.46, sideBottom = 1.24;
   const bodyPivot = 1.45;
@@ -1100,8 +1107,25 @@ const MTMTrucks = (() => {
   // whose material is an array and cannot afford the raw tessellation. The body
   // is registered so the Balanced preset reproduces the approved stance: the
   // shell is placed exactly where the export puts it over the same axles.
+  //
+  // The body's four materials are two-sided, unlike the rest of the fleet's. The
+  // export does not promise a consistent winding between panels -- 2.6% of the
+  // painted triangles, 4.7% of the trim and half the glazing are wound against
+  // their own stored normals -- which is why the orbit viewer the body was
+  // approved in builds every material with DoubleSide. Reduced, a further tenth
+  // of the panels face away, so one-sided they would be culled and the chase
+  // camera would look through the tailgate into the interior. Both renderers
+  // light back faces: three.js flips the normal per fragment in WebGL, and the
+  // software rasteriser shades every face from a 0.65 ambient start with a
+  // 0.13 downward term, so the far side of a panel reads at 0.52 or brighter
+  // rather than black. Two-sided costs about a tenth of a body-heavy frame.
+  const caddySided = material => {
+    const copy = material.clone();
+    copy.side = T.DoubleSide;
+    return copy;
+  };
   const caddyIndex = 7;
-  const caddyMaterialOf = {paint:paintMaterial,glass:glassMaterial,lit:basicLights,metal:metalMaterial};
+  const caddyMaterialOf = {paint:caddySided(paintMaterial),glass:caddySided(glassMaterial),lit:caddySided(basicLights),metal:caddySided(metalMaterial)};
   const caddyGeometries = new Map();
   const decodeBase64 = text => {
     const raw = atob(text), bytes = new Uint8Array(raw.length);
@@ -1125,7 +1149,7 @@ const MTMTrucks = (() => {
   // The baked shell is the low-detail form of the CAD export, and the reduction
   // has no usable coarser step: pushed past this budget the collapse stops and
   // starts tearing sheets apart, so `high` deliberately does not select a second
-  // variant. A rival Caddy therefore carries the whole 24 754-triangle body; the
+  // variant. A rival Caddy therefore carries the whole 26 993-triangle body; the
   // cost is measured (software renderer: +4% for a four-truck race, +25% for the
   // garage) and bounded by tests/test-caddy.cjs, which pins the rig budget.
   function buildCaddyBody(){
