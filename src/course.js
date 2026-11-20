@@ -37,7 +37,7 @@ const MTMCourses = (() => {
     {id:'office',layoutKey:'fifth-floor',name:'The Fifth Floor',classic:'2389 Office GP',type:'Circuit',
       place:'The 2389 office, ten times over',surface:'Commercial carpet',closed:true,width:30,laps:2,entrants:4,
       checkpoints:[.24,.48,.72,1],
-      nodes:[[-86,-24],[-88,16],[-80,62],[-36,72],[16,70],[56,68],[74,44],[76,-2],[66,-40],[18,-76],[-42,-66],[-82,-52]],
+      nodes:[[-20,-88],[-52,-76],[-82,-52],[-86,-24],[-88,16],[-80,62],[-36,72],[16,70],[56,68],[74,44],[76,-2],[66,-40],[40,-82]],
       relief:[],
       jumps:[[.18,16,9,2.2,'earth'],[.45,18,10,2.6,'earth'],[.78,16,8,2.2,'earth']]}
   );
