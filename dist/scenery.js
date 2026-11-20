@@ -1519,6 +1519,10 @@ const MTMScenery = (() => {
       let q=null,ok=false;
       for(const off of laterals){
         q=courseFrame(s/course.length,side*(half+off));
+        // Face the approaching driver, like every curated board: yaw toward
+        // the eye 41 m back along the track, not the raw travel tangent.
+        const eye=course.at(s-41);
+        q=frame(q.x,q.y,q.z,Math.atan2(eye.x-q.x,eye.z-q.z));
         if(!clear(q.x,q.z,w*.44+.2))continue;
         if(typeof MTMFinish!=='undefined'&&MTMFinish.reserved(course,q.x,q.z,4))continue;
         if(jokeSigns.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<((w+m.width)*.28)**2))continue;
@@ -1545,7 +1549,7 @@ const MTMScenery = (() => {
   // The project fleet: every public 2389 project gets two curated boards per
   // course, sited with the full readability survey so the copy actually reads
   // at race speed. These are catalog scenery, not tour stops.
-  function projectBillboards(stage) {
+    function projectBillboards(stage) {
     const {course, half, courseFrame, clear, ground, readingWindows, messages, projectStart, jokeSigns, random, range} = stage;
     if(!projectStart)return;
     const fleet=[];for(let i=projectStart;i<messages.length;i++)fleet.push(i);
@@ -1563,27 +1567,30 @@ const MTMScenery = (() => {
         const f=(n+random()*1.0)/order.length;
         const side=(n%2?1:-1);
         const lateral=half+[6.5,9,12,16,21][Math.floor(random()*5)];
-        const q=courseFrame(f,side*lateral);
-        if(!clear(q.x,q.z,w*.44+.2))continue;
-        if(jokeSigns.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<((w+m.width)*.28)**2))continue;
-        if(placed.some(m=>(m.x-q.x)**2+(m.z-q.z)**2<((w+m.width)*.55)**2))continue;
-        const cs=Math.cos(q.yaw),sn=Math.sin(q.yaw);
+        const raw=courseFrame(f,side*lateral);
+        // Face the approaching driver, like every curated board.
+        const eye=course.at(f*course.length-41);
+        const board=frame(raw.x,raw.y,raw.z,Math.atan2(eye.x-raw.x,eye.z-raw.z));
+        if(!clear(board.x,board.z,w*.44+.2))continue;
+        if(jokeSigns.some(m=>(m.x-board.x)**2+(m.z-board.z)**2<((w+m.width)*.42)**2))continue;
+        if(placed.some(m=>(m.x-board.x)**2+(m.z-board.z)**2<((w+m.width)*.55)**2))continue;
+        const cs=Math.cos(board.yaw),sn=Math.sin(board.yaw);
         let crest=-Infinity;
         for(const du of [-w*.42,w*.42])for(const dv of [-.8,.8]){
-          const x=q.x+cs*du+sn*dv,z=q.z-sn*du+cs*dv;crest=Math.max(crest,ground(x,z));
+          const x=board.x+cs*du+sn*dv,z=board.z-sn*du+cs*dv;crest=Math.max(crest,ground(x,z));
         }
-        const bottom=Math.max(2.8,crest-q.y+2.6)+(n%4===0?8.2:0);
-        const rays=readingRays(stage,q,w,h,bottom,course.length);
-        if(readableFraction(stage,rays,facePlate(q,w,h,bottom,.22))<.5)continue;
-        bulletinBoard(stage,q,w,h,bottom,style,cell,false,f,true);
-        readingWindows.push({x:q.x,z:q.z,width:w,height:h,eyes:rays.eyes,marketEyes:rays.eyes,targets:rays.targets});
-        placed.push({x:q.x,z:q.z,width:w});
+        const bottom=Math.max(2.8,crest-board.y+2.6)+(n%4===0?8.2:0);
+        const rays=readingRays(stage,board,w,h,bottom,course.length);
+        if(readableFraction(stage,rays,facePlate(board,w,h,bottom,.22))<.5)continue;
+        bulletinBoard(stage,board,w,h,bottom,style,cell,false,f,true);
+        readingWindows.push({x:board.x,z:board.z,width:w,height:h,eyes:rays.eyes,marketEyes:rays.eyes,targets:rays.targets});
+        placed.push({x:board.x,z:board.z,width:w});
         done=true;
       }
     }
   }
 
-  // ---- desert, forest and roadside landmarks -----------------------------
+// ---- desert, forest and roadside landmarks -----------------------------
   function mesa(stage, x,z,rx,rz,height,mode,distant=false) {
     const {ground, color, tri, quad, obstacles, range} = stage;
     // Landmark records let tests audit sign clearance against the true rock
