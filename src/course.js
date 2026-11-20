@@ -35,11 +35,15 @@ const MTMCourses = (() => {
   );
   specs.push(
     {id:'office',layoutKey:'fifth-floor',name:'The Fifth Floor',classic:'2389 Office GP',type:'Circuit',
-      place:'The 2389 office, ten times over',surface:'Commercial carpet',closed:true,width:30,laps:2,entrants:4,
+      place:'The 2389 office, ten times over',surface:'Commercial carpet',closed:true,width:16,laps:2,entrants:4,gateHalf:16,
       checkpoints:[.24,.48,.72,1],
-      nodes:[[-20,-88],[-52,-76],[-82,-52],[-86,-24],[-88,16],[-80,62],[-36,72],[16,70],[56,68],[74,44],[76,-2],[66,-40],[40,-82]],
+      nodes:[[-20,-88],[10,-72],[40,-46],[55,-58],[100,-62],
+        [130,-78],[155,-30],[150,40],[115,95],[60,112],[10,104],
+        [10,80],[-20,79],[-30,55],[-30,30],
+        [-60,30],[-110,30],[-150,15],[-158,-30],[-130,-60],[-90,-58],
+        [-72,-28],[-45,-45],[-30,-80]],
       relief:[],
-      jumps:[[.18,16,9,2.2,'earth'],[.45,18,10,2.6,'earth'],[.78,16,8,2.2,'earth']]}
+      jumps:[[.15,14,9,2,'earth'],[.42,16,9,2.4,'earth'],[.8,14,8,2,'earth']]}
   );
   const {clamp} = MTMKit;
   const smooth=t=>t*t*(3-2*t);
@@ -147,7 +151,7 @@ const MTMCourses = (() => {
     // both front axles on one line. Rally trucks occupy two staggered rows.
     const lane=Math.min(6.7,spec.width*.295);
     const gridSlots=spec.id==='indiana'?[[-.2,lane],[-.2,-lane]]:
-      spec.id==='office'?[[-19.4,lane],[-12.2,-lane],[-3.8,lane],[3.4,-lane]]:
+      spec.id==='office'?[[-20.5,lane],[-9.5,-lane],[.5,lane],[10.5,-lane]]:
       [[-19.4,lane],[-2.8,-lane],[-5.3,lane],[-16.9,-lane]];
     const gridInk=[];
     for(const [s,side] of gridSlots){

@@ -174,7 +174,7 @@ const MTMPhysics = (() => {
     // never awards a checkpoint, and the gate sequence cannot be skipped.
     if(old>=0||now<0||now===old)return;
     const f=clamp(-old/(now-old),0,1),x=lerp(oldX,p.x,f),z=lerp(oldZ,p.z,f),side=(x-a.x)*a.dz-(z-a.z)*a.dx;
-    if(Math.abs(side)>c.width*.58+1.25)return;
+    if(Math.abs(side)>(c.gateHalf??c.width*.58+1.25))return;
     const stamp=g.time-dt+f*dt;
     if(a.finish){
       p.lap++;g.lapTimes.push(stamp-g.lapStart);g.lapStart=stamp;p.safeS=0;
