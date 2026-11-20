@@ -12,8 +12,9 @@ npm run test:render
 | Command | Coverage |
 | --- | --- |
 | `npm test` | Grid spacing and launch timing, manual shifting, contact, deformation, complete races, both tournament menus and standings |
-| `npm run test:render` | Boots the actual HTML at a file URL, renders all seven garage rigs and checks wheel changes, camera reset, input and race HUD |
+| `npm run test:render` | Boots the actual HTML at a file URL, renders all eight garage rigs and checks wheel changes, camera reset, input and race HUD |
 | `npm run test:canvas` | Forces the last-resort sprite renderer by disabling WASM in the offline harness |
+| `npm run test:caddy-drive` | Takes the imported Caddy out of the real garage: two tire/stance fits, a race with throttle, steering and braking, and a tournament start |
 | `npm run test:scenery` | Mounts the original course environments and checks approach visibility, acts, signage, horns and tour stops |
 | `npm run test:endurance` | Runs twelve-lap desert and figure-eight races against the fixed-step driver |
 | `npm run build:raster` | Compiles the software triangle renderer after a change to `src/raster.ts`; follow with `npm run build` |

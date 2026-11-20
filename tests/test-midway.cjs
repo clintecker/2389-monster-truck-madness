@@ -5,7 +5,7 @@ global.window=global;require('../src/three.min.js');global.THREE=globalThis.THRE
 let frame;const host={clientWidth:960,clientHeight:630,appendChild(c){frame=c;}};
 global.document={createElement(){const c=cn.createCanvas(8,8),context=c.getContext.bind(c);c.getContext=(name,...args)=>name==='2d'?context(name,...args):null;return c;},getElementById(){return host;}};
 const bundle=require('./support/bundle.cjs');
-vm.runInThisContext(bundle.source(['kit','course','celestial','finish','track','scenery','trucks','world','contact','physics','props','soilart','oddities','midway-mesa','midway-loop','midway-strip','sponsor-art','neon-art','lcd-art','holo-art','project-fair','midway','salvage-art','parade-art','carnival','electric','crowd','software','view']).replace('/*__WASM__*/',fs.readFileSync(__dirname+'/../src/raster.wasm').toString('base64')),{filename:'game-bundle.js'});
+vm.runInThisContext(bundle.source(['kit','course','celestial','finish','track','scenery','caddy-model','trucks','world','contact','physics','props','soilart','oddities','midway-mesa','midway-loop','midway-strip','sponsor-art','neon-art','lcd-art','holo-art','project-fair','midway','salvage-art','parade-art','carnival','electric','crowd','software','view']).replace('/*__WASM__*/',fs.readFileSync(__dirname+'/../src/raster.wasm').toString('base64')),{filename:'game-bundle.js'});
 // Compare the complete lookout frame with the isolated star and lunar mesh.
 // This catches gantries and moving floats eclipsing the disk after scenery edits.
 function checkMoon(g){

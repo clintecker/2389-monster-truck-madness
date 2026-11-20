@@ -1,5 +1,6 @@
 /* 2389 Research Night Shift fleet: original monster-truck meshes, mechanical detail, and painted race graphics.
    Coordinates are in metres. +Z is forward and +Y is up. */
+import { MTMCaddyModel } from './caddy-model.js';
 import { MTMKit } from './kit.js';
 
 const MTMTrucks = (() => {
@@ -12,7 +13,8 @@ const MTMTrucks = (() => {
     {name:'Carolina Crusher',color:'#ff5595',number:'12',ink:'#5c223d',paint:'#a12f5b',highlight:'#d24978',accent:'#ffc263',trim:'#ff61a0',lamp:'#ffdf99'},
     {name:'Mux Switchblade',color:'#35f3cf',number:'23',ink:'#102938',paint:'#166a75',highlight:'#8be7cf',accent:'#75ffe3',trim:'#e65798',lamp:'#fff2b0'},
     {name:'Orrery Orbital',color:'#ce9aff',number:'89',ink:'#342944',paint:'#755197',highlight:'#f0c881',accent:'#d1a5ff',trim:'#78ecfa',lamp:'#f9e7ff'},
-    {name:'Soloclaw',color:'#ff815e',number:'38',ink:'#3c2229',paint:'#ac453e',highlight:'#ff895e',accent:'#cfff8c',trim:'#fcad51',lamp:'#ffebac'}
+    {name:'Soloclaw',color:'#ff815e',number:'38',ink:'#3c2229',paint:'#ac453e',highlight:'#ff895e',accent:'#cfff8c',trim:'#fcad51',lamp:'#ffebac'},
+    {name:'VW Caddy Mk1 Parts Runner',color:'#f2c12a',number:'83',ink:'#1b2233',paint:'#ad8500',highlight:'#ffd75e',accent:'#f6f2e6',trim:'#b0151c',lamp:'#ffe9b4'}
   ];
   const sideZ = 2.78, sideTop = 3.46, sideBottom = 1.24;
   const bodyPivot = 1.45;
@@ -1088,6 +1090,54 @@ const MTMTrucks = (() => {
       rod(shell,[x,2.573,1.854],[x,2.573,1.863],.061,'#1f2b31',12);
     }
   }
+  // ---- VW Caddy Mk1 Parts Runner -----------------------------------------
+  // The eighth truck is the approved CAD body on parts the fleet already
+  // carries: BIGFOOT's open ladder frame, live axles, coilovers, tyres and hub
+  // castings are unchanged, and pose() articulates them exactly as it does for
+  // every other rig. tools/bake-caddy-model.cjs reduced the 251 678-triangle
+  // export into caddy-model.js -- one mesh per material group, colours as sRGB
+  // bytes, no stored normals -- because the software rasteriser skips a mesh
+  // whose material is an array and cannot afford the raw tessellation. The body
+  // is registered so the Balanced preset reproduces the approved stance: the
+  // shell is placed exactly where the export puts it over the same axles.
+  const caddyIndex = 7;
+  const caddyMaterialOf = {paint:paintMaterial,glass:glassMaterial,lit:basicLights,metal:metalMaterial};
+  const caddyGeometries = new Map();
+  const decodeBase64 = text => {
+    const raw = atob(text), bytes = new Uint8Array(raw.length);
+    for (let i = 0; i < raw.length; i++) bytes[i] = raw.charCodeAt(i);
+    return bytes;
+  };
+  const srgbToLinear = c => c <= .04045 ? c / 12.92 : Math.pow((c + .055) / 1.055, 2.4);
+  function caddyGeometry(part){
+    if(caddyGeometries.has(part.name))return caddyGeometries.get(part.name);
+    const position=decodeBase64(part.positions),colour=decodeBase64(part.colors),indices=decodeBase64(part.indices);
+    const colors=new Float32Array(colour.length);
+    for(let i=0;i<colour.length;i++)colors[i]=srgbToLinear(colour[i]/255);
+    const geometry=new T.BufferGeometry();
+    geometry.setAttribute('position',new T.Float32BufferAttribute(new Float32Array(position.buffer,position.byteOffset,position.length/4),3));
+    geometry.setAttribute('color',new T.Float32BufferAttribute(colors,3));
+    geometry.setIndex(new T.BufferAttribute(new Uint16Array(indices.buffer,indices.byteOffset,indices.length/2),1));
+    geometry.computeVertexNormals();geometry.computeBoundingSphere();
+    caddyGeometries.set(part.name,geometry);return geometry;
+  }
+  let caddyBody=null;
+  // The baked shell is the low-detail form of the CAD export, and the reduction
+  // has no usable coarser step: pushed past this budget the collapse stops and
+  // starts tearing sheets apart, so `high` deliberately does not select a second
+  // variant. A rival Caddy therefore carries the whole 24 754-triangle body; the
+  // cost is measured (software renderer: +4% for a four-truck race, +25% for the
+  // garage) and bounded by tests/test-caddy.cjs, which pins the rig budget.
+  function buildCaddyBody(){
+    if(caddyBody)return caddyBody;
+    const sub=new T.Group();sub.name=roster[caddyIndex].name;
+    for(const part of MTMCaddyModel.parts){
+      const mesh=new T.Mesh(caddyGeometry(part),caddyMaterialOf[part.material]||metalMaterial);
+      mesh.name=part.name;mesh.castShadow=true;mesh.receiveShadow=true;sub.add(mesh);
+    }
+    sub.position.y=-bodyPivot;
+    return caddyBody=sub;
+  }
   const raceNoseFits={1:vanFace,2:cobraHead,3:crusherInjector};
   function assembleRaceBody(kit){
     const {decal,shell,metal,glass,lit,spec}=kit,sub=new T.Group();
@@ -1278,8 +1328,11 @@ const MTMTrucks = (() => {
     const num=Number(index),id=Number.isFinite(num)?((Math.trunc(num)%roster.length)+roster.length)%roster.length:0;
     const tires=selection(setup?.tires,0),suspension=selection(setup?.suspension,1),preset=suspensionSets[suspension];
     const high=!!highDetail,key=id+':'+high;
-    if(!caches.has(key))caches.set(key,{paint:buildBody(id,high),chassis:chassis(id<4?id:[0,1,3][id-4],high)});
-    const parts=caches.get(key),wheel=wheelGeometry(id,high,tires),root=new T.Group(),body=new T.Group(),wheels=[],spins=[],struts=[];
+    // The Caddy rides BIGFOOT's running gear and frame, so its wheels, axles and
+    // coilovers come from the same shared geometry as every other rig.
+    const gear=id===caddyIndex?0:id,frame=gear<4?gear:[0,1,3][gear-4];
+    if(!caches.has(key))caches.set(key,{paint:id===caddyIndex?buildCaddyBody():buildBody(id,high),chassis:chassis(frame,high)});
+    const parts=caches.get(key),wheel=wheelGeometry(gear,high,tires),root=new T.Group(),body=new T.Group(),wheels=[],spins=[],struts=[];
     root.name=roster[id].name;body.name='Suspended body';body.position.y=bodyPivot+preset.lift;
     const sprungFrame=parts.chassis.clone(true);sprungFrame.position.y=-bodyPivot;
     const housings=axles(high).clone(true);

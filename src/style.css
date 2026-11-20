@@ -547,6 +547,8 @@ button:focus-visible,select:focus-visible,a:focus-visible,[tabindex]:focus-visib
 
 #home[data-truck="6"] .hero:before {background-image:url('cover-soloclaw.webp');}
 
+#home[data-truck="7"] .hero:before {background-image:url('cover-caddy.webp');}
+
 .card[data-layout=packet-pass]{--card-image:url('tile-packet-pass.webp')}
 
 .card[data-layout=dead-letter]{--card-image:url('tile-dead-letter.webp')}

@@ -20,7 +20,7 @@ win.HTMLCanvasElement.prototype.getContext=function(type){
  }));return contexts.get(this);
 };
 vm.runInContext(fs.readFileSync(__dirname+'/../src/three.min.js','utf8'),ctx,{filename:'three.min.js'});
-vm.runInContext(require('./support/bundle.cjs').source(['kit','trucks','scenery','audio','fitment-sprites','course','celestial','finish','track','world','contact','physics','motion','props','soilart','oddities','midway-mesa','midway-loop','midway-strip','sponsor-art','neon-art','lcd-art','holo-art','project-fair','midway','salvage-art','parade-art','carnival','electric','crowd','software','view','app']).replace('/*__WASM__*/',fs.readFileSync(__dirname+'/../src/raster.wasm').toString('base64'))+"\nglobalThis.MTMTrucks=MTMTrucks;globalThis.MTMFitmentArt=MTMFitmentArt;",ctx,{filename:'game-bundle.js'});
+vm.runInContext(require('./support/bundle.cjs').source(['kit','caddy-model','trucks','scenery','audio','fitment-sprites','course','celestial','finish','track','world','contact','physics','motion','props','soilart','oddities','midway-mesa','midway-loop','midway-strip','sponsor-art','neon-art','lcd-art','holo-art','project-fair','midway','salvage-art','parade-art','carnival','electric','crowd','software','view','app']).replace('/*__WASM__*/',fs.readFileSync(__dirname+'/../src/raster.wasm').toString('base64'))+"\nglobalThis.MTMTrucks=MTMTrucks;globalThis.MTMFitmentArt=MTMFitmentArt;",ctx,{filename:'game-bundle.js'});
 const dirty=new Set(),sourceImages=new WeakMap();
 const READS=new Set(['getImageData','measureText','isPointInPath','createImageData']);
 const qualify=args=>args.map(a=>{
@@ -114,7 +114,7 @@ async function verify(){
    truck(i);assert.equal(by('rigName').textContent,names[i]);assert.equal(doc.querySelectorAll('#garageView canvas').length,1);
    hash.push(snap('#garageView canvas'));
  }
- distinct(hash,'seven distinct trucks');click('nextTruck');assert.equal(snap('#garageView canvas'),hash[0]);click('prevTruck');assert.equal(snap('#garageView canvas'),hash.at(-1));truck(0);
+ distinct(hash,'eight distinct trucks');click('nextTruck');assert.equal(snap('#garageView canvas'),hash[0]);click('prevTruck');assert.equal(snap('#garageView canvas'),hash.at(-1));truck(0);
  // Compare the same truck, same camera and simulation instant. Then restore the
  // exact earlier frame to rule out animated camera or lighting causing differences.
  const tires=setRow('set-tires');distinct(tires,'full truck changes with each tire');
@@ -162,7 +162,7 @@ async function verify(){
  tick(18,.20);press('keydown','KeyW');tick(10,.12);press('keydown','KeyE');assert.equal(by('gearHud').textContent,'2');
  tick(4,.12);press('keydown','KeyE',true);assert.equal(by('gearHud').textContent,'2');press('keyup','KeyW');
  click('camButton');assert(doc.body.classList.contains('cockpit'));click('pauseButton');click('leaveRace');
- console.log((emergency?'Canvas sprites':'WASM meshes')+': exact offline framebuffer checks passed for 7 trucks, all 3 tires in full / close-up / race views, all 3 stances, bounce test, per-truck saved settings, 12-lap HUD, migrated records, horn, cockpit and manual shifts.');
+ console.log((emergency?'Canvas sprites':'WASM meshes')+': exact offline framebuffer checks passed for 8 trucks, all 3 tires in full / close-up / race views, all 3 stances, bounce test, per-truck saved settings, 12-lap HUD, migrated records, horn, cockpit and manual shifts.');
  dom.window.close();
 }
 verify().catch(e=>{console.error(e);dom.window.close();process.exitCode=1;});

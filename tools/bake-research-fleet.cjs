@@ -22,8 +22,8 @@ global.window=global;require(root+'/three.min.js');global.THREE=globalThis.THREE
    ctx.putImageData(im,0,0);return cv;
   }
   function data(cv){return cv.toDataURL('image/webp',.87);}
-  for(let id=4;id<=6;id++){
-   const slots=['mux','orrery','soloclaw'],slug=slots[id-4],r=MTMSoftwareRenderer(),scene=new THREE.Scene();scene.background=new THREE.Color('#06f701');
+  for(const {id,slug} of [{id:4,slug:'mux'},{id:5,slug:'orrery'},{id:6,slug:'soloclaw'},{id:7,slug:'caddy'}]){
+   const r=MTMSoftwareRenderer(),scene=new THREE.Scene();scene.background=new THREE.Color('#06f701');
    const sheets=Object.fromEntries(['front','rear'].map(k=>[k,cn.createCanvas(W*3,H*3)])),fit=new Set();const wheels=[];
    for(let susp=0;susp<3;susp++)for(let tire=0;tire<3;tire++){
      const rig=MTMTrucks.make(id,true,{tires:tire,suspension:susp});scene.add(rig.root);

@@ -65,7 +65,7 @@ requires control of that host; Cloudflare cannot configure that redirect for it.
 
 - Load `/` and verify HTML delivery, then check a missing path returns 404.
 - Drive a race through the finish, check audio after user interaction, and inspect
-  all seven trucks. Check Safari and Chrome with real WebGL; the automated rendering
+  all eight trucks. Check Safari and Chrome with real WebGL; the automated rendering
   suite covers the software and Canvas paths, not real GPU rendering.
 - Save settings, reload, and verify persistence. The key is
   `mtm96-offroad-racing-1`; localStorage is origin-specific. Existing records on the

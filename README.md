@@ -2,7 +2,7 @@
 
 **CAUTION: LOAD-BEARING SAND.**
 
-The 2389 Research motor pool has seven monster trucks, one municipal lobster permit, and a pressing need to establish whether a satellite dish can survive a hard landing. You have been assigned the experimental vehicle. The other three drivers have been assigned the same experiment.
+The 2389 Research motor pool has eight monster trucks, one municipal lobster permit, and a pressing need to establish whether a satellite dish can survive a hard landing. You have been assigned the experimental vehicle. The other three drivers have been assigned the same experiment.
 
 **[Play Night Shift](https://monster-truck-madness-96-racing.clintecker.chatgpt.site/)** · **[Driver handbook](docs/DRIVING.md)** · **[Build and contribute](CONTRIBUTING.md)**
 

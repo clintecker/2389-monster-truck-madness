@@ -7,7 +7,8 @@ const MTMContact = (() => {
   const skin=.035;
   const truck={halfWidth:1.77,halfLength:2.50};
   const grip={rubber:.44,stone:.35,wood:.30,metal:.22,plastic:.16};
-  const weight=[1,.97,1.04,.93,.95,.98,.90];
+  // Mass multiplier per roster ID. The Caddy pickup sits below the fleet average.
+  const weight=[1,.97,1.04,.93,.95,.98,.90,.92];
   function axes(yaw=0){const s=Math.sin(yaw),c=Math.cos(yaw);return [[c,-s],[s,c]];}
   function point(p,ax,x,z){return {x:p.x+x*ax[0][0]+z*ax[1][0],z:p.z+x*ax[0][1]+z*ax[1][1]};}
   function local(dx,dz,ax){return dx*ax[0]+dz*ax[1];}
@@ -96,7 +97,7 @@ const MTMContact = (() => {
     }
     p.rub+=(p.rubThisStep-p.rub)*(1-Math.exp(-dt*(p.rubThisStep>p.rub?25:16)));
   }
-  return {manifold,vehicles};
+  return {manifold,vehicles,weights:weight};
 })();
 
 export {MTMContact};
