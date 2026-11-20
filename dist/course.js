@@ -37,8 +37,8 @@ const MTMCourses = (() => {
     {id:'office',layoutKey:'fifth-floor',name:'The Fifth Floor',classic:'2389 Office GP',type:'Circuit',
       place:'The 2389 office, ten times over',surface:'Commercial carpet',closed:true,width:16,laps:2,entrants:4,gateHalf:16,
       checkpoints:[.24,.48,.72,1],
-      nodes:[[-20,-88],[10,-72],[40,-46],[55,-58],[100,-62],
-        [130,-78],[155,-30],[150,40],[115,95],[60,112],[10,104],
+      nodes:[[-20,-76],[10,-72],[40,-46],[55,-58],[100,-62],
+        [130,-78],[160,-25],[165,40],[135,105],[95,115],[10,104],
         [10,80],[-20,79],[-30,55],[-30,30],
         [-60,30],[-110,30],[-150,15],[-158,-30],[-130,-60],[-90,-58],
         [-72,-28],[-45,-45],[-30,-80]],
@@ -151,7 +151,7 @@ const MTMCourses = (() => {
     // both front axles on one line. Rally trucks occupy two staggered rows.
     const lane=Math.min(6.7,spec.width*.295);
     const gridSlots=spec.id==='indiana'?[[-.2,lane],[-.2,-lane]]:
-      spec.id==='office'?[[-20.5,lane],[-9.5,-lane],[.5,lane],[10.5,-lane]]:
+      spec.id==='office'?[[-21.5,lane],[-10,-lane],[1.5,lane],[13,-lane]]:
       [[-19.4,lane],[-2.8,-lane],[-5.3,lane],[-16.9,-lane]];
     const gridInk=[];
     for(const [s,side] of gridSlots){
